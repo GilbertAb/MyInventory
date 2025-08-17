@@ -16,13 +16,28 @@ GO
 CREATE PROCEDURE MyInventory.usp_GetProducts
 AS
 BEGIN
-	SELECT 
-		Id,
-		ProductName,
-		Category,
-		Stock,
-		CreatedAt,
-		UpdatedAt
-	FROM Product;
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		-- Get Product Data
+		SELECT 
+			Id,
+			ProductName,
+			Category,
+			Stock,
+			CreatedAt,
+			UpdatedAt
+		FROM MyInventory.Product;
+		
+		-- Succeed data
+		SELECT 
+			0 AS ErrorCode,
+			'OK' AS ErrorMessage;
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorCode,
+			ERROR_MESSAGE() AS ErrorMessage
+	END CATCH;
 END;
 GO
