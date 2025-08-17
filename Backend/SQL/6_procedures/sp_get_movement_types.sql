@@ -16,9 +16,24 @@ GO
 CREATE PROCEDURE MyInventory.usp_GetMovementTypes
 AS
 BEGIN
-	SELECT
-		Id,
-		MovementType
-	FROM MyInventory.MovementTypeCatalog;
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		-- Get Movement Types data
+		SELECT
+			Id,
+			MovementType
+		FROM MyInventory.MovementTypeCatalog;
+
+		-- Succeed data
+		SELECT 
+			0 AS ErrorCode,
+			'OK' AS ErrorMessage;
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorCode,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH
 END;
 GO
