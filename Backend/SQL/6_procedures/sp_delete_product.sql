@@ -1,3 +1,10 @@
+/******************************************************************************/
+/* Database      : MyInventory                                                */
+/* Author        : Gilbert Marquez                                            */
+/* Created on    : 17 - 08 - 2025                                             */
+/* Purpose       : Delete a product from the inventory                        */
+/******************************************************************************/
+
 USE MyInventoryDb;
 GO
 
