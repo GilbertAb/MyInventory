@@ -52,12 +52,16 @@ BEGIN
 		
 		-- Get name and stock if there are movements
 		IF @NumberOfMovements > 0
+		BEGIN
 			SELECT @ProductName = ProductName, @Stock = Stock
 			FROM MyInventory.Product
 			WHERE Id = @ProductId;
+		END
 		ELSE
+		BEGIN
 			SET @ErrorCode = 50101;
 			SET @ErrorMessage = 'No movements found';
+		END
 	END TRY
 	BEGIN CATCH
 		-- Error data
