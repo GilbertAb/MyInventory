@@ -18,6 +18,7 @@ var app = builder.Build();
 
 // Middleware
 app.UseMiddleware<HeaderValidationMiddleware>();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
