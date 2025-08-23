@@ -71,7 +71,7 @@ namespace External.MyInventoryApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getProductById/{productId:int}")]
+        [HttpGet("getProduct/{productId:int}")]
         public async Task<IActionResult> GetProductById(int productId)
         {
             // Call get product by Id service
