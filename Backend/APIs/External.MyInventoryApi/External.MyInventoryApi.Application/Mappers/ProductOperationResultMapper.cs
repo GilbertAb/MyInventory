@@ -29,5 +29,22 @@ namespace External.MyInventoryApi.Application.Mappers
             }
             return null;
         };
+
+        public static readonly Func<Product, ProductDto?> MapProduct = product =>
+        {
+            if (product != null)
+            {
+                var productDto = new ProductDto
+                {
+                    Id = product.Id,
+                    ProductName = product.ProductName,
+                    Category = product.Category,
+                    Stock = product.Stock
+                };
+
+                return productDto;
+            }
+            return null;
+        };
     }
 }
