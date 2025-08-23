@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Installers\" />
     <Folder Include="Requests\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.Application\External.MyInventoryApi.Application.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.CrossCutting\External.MyInventoryApi.CrossCutting.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.DataAccess.Contracts\External.MyInventoryApi.DataAccess.Contracts.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.DataAccess\External.MyInventoryApi.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>
