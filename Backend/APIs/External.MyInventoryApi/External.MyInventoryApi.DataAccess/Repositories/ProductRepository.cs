@@ -17,8 +17,9 @@ namespace External.MyInventoryApi.DataAccess.Repositories
         private readonly ILogger<ProductRepository> _logger;
         private readonly string _spAddProduct;
         private readonly string _spDeleteProduct;
-        private readonly string _spUpdateProduct;
         private readonly string _spGetAllProducts;
+        private readonly string _spGetProductById;
+        private readonly string _spUpdateProduct;
 
         public ProductRepository(ISqlServerDatabase database, IConfiguration configuration,
             ILogger<ProductRepository> logger)
@@ -32,6 +33,8 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             _spDeleteProduct = _configuration.GetSection("StoredProcedures:SP_DELETE_PRODUCT").Value
                 ?? throw new ArgumentNullException("name of sp add product not found");
             _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCTS").Value
+                ?? throw new ArgumentNullException("name of sp get products not found");
+            _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_BY_ID").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
             _spUpdateProduct = _configuration.GetSection("StoredProcedures:SP_UPDATE_PRODUCT").Value
                 ?? throw new ArgumentNullException("name of sp add product not found");
@@ -231,5 +234,48 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             }
         }
 
+        public async Task<OperationResult<Product?>> GetProductById(int productId)
+        {
+            try
+            {
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                };
+                // Execute SP 
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spGetProductById, parameters);
+
+                // Validate result
+                if (spResult.ErrorCode == 0)
+                {
+                    _logger.LogInformation("Product retrieved successfully");
+                }
+                else
+                {
+                    _logger.LogWarning("Error retrieving product: {ErrorCode} {ErrorMessage}",
+                        spResult.ErrorCode, spResult.ErrorMessage);
+
+                    return new OperationResult<Product?>
+                    {
+                        Data = null,
+                        ErrorCode = spResult.ErrorCode,
+                        ErrorMessage = spResult.ErrorMessage
+                    };
+                }
+
+                // Map result
+                OperationResult<Product?> result = StoredProcedureResultMapper<Product?>
+                    .MapToOperationResult(
+                        spResult,
+                        dataDS => ProductStoredProcedureMappers.MapGetProduct(dataDS)
+                    );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing get product by id");
+                throw;
+            }
+        }
     }
 }
