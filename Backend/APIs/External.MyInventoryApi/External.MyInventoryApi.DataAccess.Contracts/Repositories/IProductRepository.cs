@@ -10,7 +10,7 @@ namespace External.MyInventoryApi.DataAccess.Contracts.Repositories
 {
     public interface IProductRepository
     {
+        Task<OperationResult<int?>> AddProduct(Product product);
         Task<OperationResult<IEnumerable<Product>?>> GetAllProducts();
-
     }
 }

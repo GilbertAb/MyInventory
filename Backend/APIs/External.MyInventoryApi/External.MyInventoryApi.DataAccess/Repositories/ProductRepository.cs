@@ -15,6 +15,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
         private readonly ISqlServerDatabase _database;
         private readonly IConfiguration _configuration;
         private readonly ILogger<ProductRepository> _logger;
+        private readonly string _spAddProduct;
         private readonly string _spGetAllProducts;
 
         public ProductRepository(ISqlServerDatabase database, IConfiguration configuration,
@@ -24,15 +25,68 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            _spAddProduct = _configuration.GetSection("StoredProcedures:SP_ADD_PRODUCT").Value
+                ?? throw new ArgumentNullException("name of sp add product not found");
             _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCTS").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
+        }
+        public async Task<OperationResult<int?>> AddProduct(Product product)
+        {
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
+
+            if (string.IsNullOrWhiteSpace(product.ProductName))
+                throw new ArgumentException("Product name can´t be empty", nameof(product));
+
+            try
+            {
+
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    ["@ProductName"] = product.ProductName,
+                    ["@Category"] = product.Category ?? "",
+                    ["@Stock"] = product.Stock
+                };
+
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spAddProduct, parameters);
+
+                // Validate result
+                if (spResult.ErrorCode == 0)
+                {
+                    _logger.LogInformation("Product added successfully: {ProductName}", product.ProductName);
+                }
+                else
+                {
+                    _logger.LogWarning("Error adding product {ProductName}: {ErrorCode} {ErrorMessage}",
+                        product.ProductName, spResult.ErrorCode, spResult.ErrorMessage);
+
+                    return new OperationResult<int?>
+                    {
+                        Data = null,
+                        ErrorCode = spResult.ErrorCode,
+                        ErrorMessage = spResult.ErrorMessage
+                    };
+                }
+
+                // Map result
+                OperationResult<int?> result = StoredProcedureResultMapper<int?>.MapToOperationResult(
+                    spResult,
+                    dataDS => ProductStoredProcedureMappers.MapAddProduct(dataDS)
+                );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing add product: {ProductName}", product.ProductName);
+                throw;
+            }
         }
 
         public async Task<OperationResult<IEnumerable<Product>?>> GetAllProducts()
         {
             try
             {
-
                 Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
                 };

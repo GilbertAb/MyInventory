@@ -1,15 +1,19 @@
 ﻿using External.MyInventoryApi.Business.Entities;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace External.MyInventoryApi.DataAccess.Mappers
 {
     public static class ProductStoredProcedureMappers
     {
+        public static readonly Func<DataSet, int?> MapAddProduct = ds =>
+        {
+            if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                return Convert.ToInt32(ds.Tables[0].Rows[0]["NewProductId"]);
+            }
+            return null;
+        };
+
         public static readonly Func<DataSet, IEnumerable<Product>?> MapProducts = ds =>
         {
             if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
