@@ -1,4 +1,5 @@
 ﻿using External.MyInventoryApi.Application.Contracts.DTOs;
+using External.MyInventoryApi.Application.Contracts.DTOs.Response;
 using External.MyInventoryApi.Application.Contracts.Results;
 using External.MyInventoryApi.Application.Contracts.Services;
 using External.MyInventoryApi.Application.Mappers;
@@ -17,12 +18,12 @@ namespace External.MyInventoryApi.Application.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<ServiceResult<int?>> AddProduct(ProductDto product)
+        public async Task<ServiceResult<AddProductResponseDto>> AddProduct(ProductDto product)
         {
             // Validate product
             if (product == null)
             {
-                return new ServiceResult<int?>
+                return new ServiceResult<AddProductResponseDto>
                 {
                     Data = null,
                     ErrorCode = -1,
@@ -32,7 +33,7 @@ namespace External.MyInventoryApi.Application.Services
             // Validate product name
             if (string.IsNullOrEmpty(product.ProductName))
             {
-                return new ServiceResult<int?>
+                return new ServiceResult<AddProductResponseDto>
                 {
                     Data = null,
                     ErrorCode = -1,
@@ -44,12 +45,12 @@ namespace External.MyInventoryApi.Application.Services
             OperationResult<int?> result = await _repository.AddProduct(ProductMapper.MapProductDtoToProduct(product));
 
             //Map to service result
-            ServiceResult<int?> serviceResult = OperationResultMapper<int?, int?>.MapToServiceResult(
+            ServiceResult<AddProductResponseDto?> serviceResult = OperationResultMapper<AddProductResponseDto, int?>.MapToServiceResult(
                 result,
-                id => id
+                id => new AddProductResponseDto { Id = id }
             );
 
-            return serviceResult;
+            return serviceResult!;
         }
 
         public async Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts()

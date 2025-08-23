@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Requests\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
     <ProjectReference Include="..\External.MyInventoryApi.Application\External.MyInventoryApi.Application.csproj" />
     <ProjectReference Include="..\External.MyInventoryApi.CrossCutting\External.MyInventoryApi.CrossCutting.csproj" />

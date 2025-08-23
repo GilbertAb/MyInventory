@@ -1,6 +1,9 @@
 ﻿using External.MyInventoryApi.Application.Contracts.DTOs;
+using External.MyInventoryApi.Application.Contracts.DTOs.Response;
 using External.MyInventoryApi.Application.Contracts.Results;
 using External.MyInventoryApi.Application.Contracts.Services;
+using External.MyInventoryApi.Mappers;
+using External.MyInventoryApi.Requests.Product;
 using Microsoft.AspNetCore.Mvc;
 
 namespace External.MyInventoryApi.Controllers
@@ -16,6 +19,26 @@ namespace External.MyInventoryApi.Controllers
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+        }
+        
+        [HttpPost("addProduct")]
+        public async Task<IActionResult> AddProduct([FromBody] AddProductRequest product)
+        {
+            if (product == null)
+            {
+                return BadRequest("Product can't be null");
+            }
+            // Call add product service
+            ServiceResult<AddProductResponseDto> result = await _productService.AddProduct(
+                ProductRequestMapper.MapAddProductRequestToProductDto(product)
+            );
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("getProducts")]
