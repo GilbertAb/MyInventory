@@ -70,5 +70,25 @@ namespace External.MyInventoryApi.Controllers
 
             return Ok(result);
         }
+
+        [HttpPut("updateProduct")]
+        public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest product)
+        {
+            if (product == null)
+            {
+                return BadRequest("Product can't be null");
+            }
+            // Call add product service
+            ServiceResult<UpdateProductResponseDto> result = await _productService.UpdateProduct(
+                ProductRequestMapper.MapUpdateProductRequestToProductDto(product)
+            );
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
     }
 }

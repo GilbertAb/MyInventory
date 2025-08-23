@@ -14,5 +14,16 @@ namespace External.MyInventoryApi.Mappers
                 Stock = request.Stock
             };
         }
+
+        public static ProductDto MapUpdateProductRequestToProductDto(UpdateProductRequest request)
+        {
+            return new ProductDto
+            {
+                Id = request.ProductId,
+                ProductName = request.ProductName,
+                Category = request.Category,
+                Stock = request.Stock
+            };
+        }
     }
 }
