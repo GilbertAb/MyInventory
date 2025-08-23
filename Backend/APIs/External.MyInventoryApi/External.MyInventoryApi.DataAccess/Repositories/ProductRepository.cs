@@ -83,6 +83,51 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             }
         }
 
+        public async Task<OperationResult<int?>> DeleteProduct(int productId)
+        {
+            try
+            {
+
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    ["@ProductId"] = productId,
+                };
+
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spAddProduct, parameters);
+
+                // Validate result
+                if (spResult.ErrorCode == 0)
+                {
+                    _logger.LogInformation("Product deleted successfully: {ProductId}", productId);
+                }
+                else
+                {
+                    _logger.LogWarning("Error deleting product {ProductId}: {ErrorCode} {ErrorMessage}",
+                        productId, spResult.ErrorCode, spResult.ErrorMessage);
+
+                    return new OperationResult<int?>
+                    {
+                        Data = null,
+                        ErrorCode = spResult.ErrorCode,
+                        ErrorMessage = spResult.ErrorMessage
+                    };
+                }
+
+                // Map result
+                OperationResult<int?> result = StoredProcedureResultMapper<int?>.MapToOperationResult(
+                    spResult,
+                    dataDS => ProductStoredProcedureMappers.MapAddProduct(dataDS)
+                );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing add product: {ProductName}", product.ProductName);
+                throw;
+            }
+        }
+
         public async Task<OperationResult<IEnumerable<Product>?>> GetAllProducts()
         {
             try
