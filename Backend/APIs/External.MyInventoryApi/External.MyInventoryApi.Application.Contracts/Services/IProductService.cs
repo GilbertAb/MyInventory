@@ -7,6 +7,7 @@ namespace External.MyInventoryApi.Application.Contracts.Services
     public interface IProductService
     {
         public Task<ServiceResult<AddProductResponseDto>> AddProduct(ProductDto product);
+        public Task<ServiceResult<DeleteProductResponseDto>> DeleteProduct(int productId);
         public Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts();
     }
 }

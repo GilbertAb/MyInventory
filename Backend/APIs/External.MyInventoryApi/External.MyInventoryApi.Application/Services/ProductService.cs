@@ -53,6 +53,20 @@ namespace External.MyInventoryApi.Application.Services
             return serviceResult!;
         }
 
+        public async Task<ServiceResult<DeleteProductResponseDto>> DeleteProduct(int productId)
+        {
+            // Execute delete product
+            OperationResult<int?> result = await _repository.DeleteProduct(productId);
+
+            //Map to service result
+            ServiceResult<DeleteProductResponseDto?> serviceResult = OperationResultMapper<DeleteProductResponseDto, int?>.MapToServiceResult(
+                result,
+                id => new DeleteProductResponseDto { Id = id }
+            );
+
+            return serviceResult!;
+        }
+
         public async Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts()
         {
             // Execute get all products
