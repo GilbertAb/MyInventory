@@ -1,4 +1,5 @@
 
+using External.MyInventoryApi.CrossCutting.Middleware;
 using External.MyInventoryApi.Installers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,8 @@ builder.Services.RegisterServices();
 // Build
 var app = builder.Build();
 
-// TODO: Middleware
+// Middleware
+app.UseMiddleware<HeaderValidationMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
