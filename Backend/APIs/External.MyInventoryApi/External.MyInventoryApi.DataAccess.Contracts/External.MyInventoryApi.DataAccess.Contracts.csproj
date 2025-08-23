@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="SqlServer\" />
-    <Folder Include="Results\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 
