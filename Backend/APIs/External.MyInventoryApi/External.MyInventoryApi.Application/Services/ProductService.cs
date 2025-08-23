@@ -17,6 +17,41 @@ namespace External.MyInventoryApi.Application.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
+        public async Task<ServiceResult<int?>> AddProduct(ProductDto product)
+        {
+            // Validate product
+            if (product == null)
+            {
+                return new ServiceResult<int?>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product can't be null"
+                };
+            }
+            // Validate product name
+            if (string.IsNullOrEmpty(product.ProductName))
+            {
+                return new ServiceResult<int?>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product name can't be null or empty"
+                };
+            }
+
+            // Execute add product
+            OperationResult<int?> result = await _repository.AddProduct(ProductMapper.MapProductDtoToProduct(product));
+
+            //Map to service result
+            ServiceResult<int?> serviceResult = OperationResultMapper<int?, int?>.MapToServiceResult(
+                result,
+                id => id
+            );
+
+            return serviceResult;
+        }
+
         public async Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts()
         {
             // Execute get all products
