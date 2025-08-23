@@ -82,5 +82,40 @@ namespace External.MyInventoryApi.Application.Services
 
             return serviceResult;
         }
+
+        public async Task<ServiceResult<UpdateProductResponseDto>> UpdateProduct(ProductDto product)
+        {
+            // Validate product
+            if (product == null)
+            {
+                return new ServiceResult<UpdateProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product can't be null"
+                };
+            }
+            // Validate product name
+            if (string.IsNullOrEmpty(product.ProductName))
+            {
+                return new ServiceResult<UpdateProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product name can't be null or empty"
+                };
+            }
+
+            // Execute update product
+            OperationResult<int?> result = await _repository.UpdateProduct(ProductMapper.MapProductDtoToProduct(product));
+
+            //Map to service result
+            ServiceResult<UpdateProductResponseDto?> serviceResult = OperationResultMapper<UpdateProductResponseDto, int?>.MapToServiceResult(
+                result,
+                id => new UpdateProductResponseDto { Id = id }
+            );
+
+            return serviceResult!;
+        }
     }
 }
