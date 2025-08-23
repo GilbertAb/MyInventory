@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Installers\" />
     <Folder Include="Requests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
