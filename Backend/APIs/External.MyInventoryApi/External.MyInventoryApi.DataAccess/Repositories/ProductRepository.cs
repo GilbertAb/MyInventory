@@ -34,7 +34,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                 ?? throw new ArgumentNullException("name of sp add product not found");
             _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCTS").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
-            _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_BY_ID").Value
+            _spGetProductById = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_BY_ID").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
             _spUpdateProduct = _configuration.GetSection("StoredProcedures:SP_UPDATE_PRODUCT").Value
                 ?? throw new ArgumentNullException("name of sp add product not found");
@@ -240,6 +240,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             {
                 Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
+                    ["@ProductId"] = productId,
                 };
                 // Execute SP 
                 StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spGetProductById, parameters);
