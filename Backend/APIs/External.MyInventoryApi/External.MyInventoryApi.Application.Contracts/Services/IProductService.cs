@@ -5,7 +5,6 @@ namespace External.MyInventoryApi.Application.Contracts.Services
 {
     public interface IProductService
     {
-        public Task<ServiceResult<int?>> AddProduct(ProductDto product);
         public Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts();
     }
 }

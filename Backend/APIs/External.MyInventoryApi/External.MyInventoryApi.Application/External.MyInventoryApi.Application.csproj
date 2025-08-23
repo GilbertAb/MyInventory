@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Mappers\" />
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.DataAccess.Contracts\External.MyInventoryApi.DataAccess.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
