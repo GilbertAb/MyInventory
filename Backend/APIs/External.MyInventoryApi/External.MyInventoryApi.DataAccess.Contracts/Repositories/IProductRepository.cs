@@ -13,5 +13,6 @@ namespace External.MyInventoryApi.DataAccess.Contracts.Repositories
         Task<OperationResult<int?>> AddProduct(Product product);
         Task<OperationResult<int?>> DeleteProduct(int productId);
         Task<OperationResult<IEnumerable<Product>?>> GetAllProducts();
+        Task<OperationResult<int?>> UpdateProduct(Product product);
     }
 }

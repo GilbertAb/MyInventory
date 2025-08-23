@@ -23,6 +23,15 @@ namespace External.MyInventoryApi.DataAccess.Mappers
             return null;
         };
 
+        public static readonly Func<DataSet, int?> MapUpdateProduct = ds =>
+        {
+            if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                return Convert.ToInt32(ds.Tables[0].Rows[0]["ProductId"]);
+            }
+            return null;
+        };
+
         public static readonly Func<DataSet, IEnumerable<Product>?> MapProducts = ds =>
         {
             if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
