@@ -41,6 +41,22 @@ namespace External.MyInventoryApi.Controllers
             return Ok(result);
         }
 
+        [HttpPost("deleteProduct")]
+        public async Task<IActionResult> DeleteProduct([FromBody] DeleteProductRequest productIdRequest)
+        {
+            // Call delete product service
+            ServiceResult<DeleteProductResponseDto> result = await _productService.DeleteProduct(
+                productIdRequest.ProductId
+            );
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet("getProducts")]
         public async Task<IActionResult> GetAllProducts()
         {
