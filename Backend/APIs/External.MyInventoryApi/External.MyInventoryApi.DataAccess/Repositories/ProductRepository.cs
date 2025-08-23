@@ -130,7 +130,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                 // Map result
                 OperationResult<int?> result = StoredProcedureResultMapper<int?>.MapToOperationResult(
                     spResult,
-                    dataDS => ProductStoredProcedureMappers.MapAddProduct(dataDS)
+                    dataDS => ProductStoredProcedureMappers.MapUpdateProduct(dataDS)
                 );
 
                 return result;
