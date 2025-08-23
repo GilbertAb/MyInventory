@@ -16,6 +16,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
         private readonly IConfiguration _configuration;
         private readonly ILogger<ProductRepository> _logger;
         private readonly string _spAddProduct;
+        private readonly string _spDeleteProduct;
         private readonly string _spGetAllProducts;
 
         public ProductRepository(ISqlServerDatabase database, IConfiguration configuration,
@@ -26,6 +27,8 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _spAddProduct = _configuration.GetSection("StoredProcedures:SP_ADD_PRODUCT").Value
+                ?? throw new ArgumentNullException("name of sp add product not found");
+            _spDeleteProduct = _configuration.GetSection("StoredProcedures:SP_DELETE_PRODUCT").Value
                 ?? throw new ArgumentNullException("name of sp add product not found");
             _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCTS").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
@@ -93,7 +96,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                     ["@ProductId"] = productId,
                 };
 
-                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spAddProduct, parameters);
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spDeleteProduct, parameters);
 
                 // Validate result
                 if (spResult.ErrorCode == 0)
@@ -116,14 +119,14 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                 // Map result
                 OperationResult<int?> result = StoredProcedureResultMapper<int?>.MapToOperationResult(
                     spResult,
-                    dataDS => ProductStoredProcedureMappers.MapAddProduct(dataDS)
+                    dataDS => ProductStoredProcedureMappers.MapDeleteProduct(dataDS)
                 );
 
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error executing add product: {ProductName}", product.ProductName);
+                _logger.LogError(ex, "Error executing delete product: {ProductId}", productId);
                 throw;
             }
         }
