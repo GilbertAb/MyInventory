@@ -6,7 +6,7 @@ namespace External.MyInventoryApi.DataAccess.Mappers
     // Map sp DataSet results to entities
     public class CatalogStoredProcedureMapper
     {
-        public static readonly Func<DataSet, IEnumerable<MovementType?>> MapGetMovementTypes = ds =>
+        public static readonly Func<DataSet, IEnumerable<MovementType>?> MapGetMovementTypes = ds =>
         {
             if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {

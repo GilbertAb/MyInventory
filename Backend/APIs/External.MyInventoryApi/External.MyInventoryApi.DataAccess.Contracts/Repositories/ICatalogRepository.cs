@@ -5,6 +5,6 @@ namespace External.MyInventoryApi.DataAccess.Contracts.Repositories
 {
     public interface ICatalogRepository
     {
-        Task<OperationResult<IEnumerable<MovementType?>>> GetMovementTypes();
+        Task<OperationResult<IEnumerable<MovementType>?>> GetMovementTypes();
     }
 }

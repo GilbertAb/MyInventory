@@ -29,7 +29,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                 ?? throw new ArgumentNullException("name of sp getMovementTypes not found");
         }
 
-        public async Task<OperationResult<IEnumerable<MovementType?>>> GetMovementTypes()
+        public async Task<OperationResult<IEnumerable<MovementType>?>> GetMovementTypes()
         {
             try
             {
@@ -49,7 +49,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                     _logger.LogWarning("Error retrieving movement types: {ErrorCode} {ErrorMessage}",
                         spResult.ErrorCode, spResult.ErrorMessage);
 
-                    return new OperationResult<IEnumerable<MovementType?>>
+                    return new OperationResult<IEnumerable<MovementType>?>
                     {
                         Data = null,
                         ErrorCode = spResult.ErrorCode,
@@ -58,7 +58,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
                 }
 
                 // Map result
-                OperationResult<IEnumerable<MovementType?>> result = StoredProcedureResultMapper<IEnumerable<MovementType?>>
+                OperationResult<IEnumerable<MovementType>?> result = StoredProcedureResultMapper<IEnumerable<MovementType>?>
                     .MapToOperationResult(
                         spResult,
                         dataDS => CatalogStoredProcedureMapper.MapGetMovementTypes(dataDS)
