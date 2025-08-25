@@ -16,11 +16,13 @@ namespace External.MyInventoryApi.Installers
             services.AddScoped<ISqlServerDatabase, SqlServerDatabase>();
             services.AddSingleton<ICrypto, Crypto>();
             // Repositories
-            services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICatalogRepository, CatalogRepository>();
+            services.AddScoped<IMovementRepository, MovementRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
             // Services
-            services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICatalogService, CatalogService>();
+            services.AddScoped<IMovementService, MovementService>();
+            services.AddScoped<IProductService, ProductService>();
         }
     }
 }
