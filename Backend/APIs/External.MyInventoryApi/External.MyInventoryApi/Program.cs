@@ -2,6 +2,7 @@
 using External.MyInventoryApi.CrossCutting.Middleware;
 using External.MyInventoryApi.Installers;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Prometheus;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,10 +26,12 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+// Http request metrics
+app.UseHttpMetrics();
 
 // Endpoints
 app.MapControllers();
-
+app.UseMetricServer("/metrics");
 app.MapHealthChecks("/health", new HealthCheckOptions()
 {
     ResponseWriter = async (context, report) =>
