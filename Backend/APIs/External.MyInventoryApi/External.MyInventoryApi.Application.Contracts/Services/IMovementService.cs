@@ -8,6 +8,7 @@ namespace External.MyInventoryApi.Application.Contracts.Services
     public interface IMovementService
     {
         public Task<ServiceResult<RegisterMovementResponseDto>> RegisterMovement(RegisterMovementRequest request);
+        public Task<ServiceResult<IEnumerable<MovementDto>?>> GetMovements();
         // Get the movements of a product
         public Task<ServiceResult<IEnumerable<MovementDto>?>> GetProductStockHistory(int productId);
     }

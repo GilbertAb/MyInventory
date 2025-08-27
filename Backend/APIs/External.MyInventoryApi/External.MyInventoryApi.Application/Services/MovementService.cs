@@ -46,6 +46,28 @@ namespace External.MyInventoryApi.Application.Services
 
             return serviceResult!;
         }
+        public async Task<ServiceResult<IEnumerable<MovementDto>?>> GetMovements()
+        {
+            // Execute getMovements
+            OperationResult<IEnumerable<Movement>?> result = await _repository.GetMovements();
+
+            // Map to Service Result
+            ServiceResult<IEnumerable<MovementDto>?> serviceResult =
+                OperationResultMapper<IEnumerable<MovementDto>?, IEnumerable<Movement>?>
+                    .MapToServiceResult(
+                        result,
+                        movements => MovementOperationResultMapper.MapMovements(movements)
+                )
+                ?? new ServiceResult<IEnumerable<MovementDto>?>
+                {
+                    Data = null,
+                    ErrorCode = result.ErrorCode,
+                    ErrorMessage = result.ErrorMessage
+                }
+            ;
+
+            return serviceResult;
+        }
         // Get movements of a product
         public async Task<ServiceResult<IEnumerable<MovementDto>?>> GetProductStockHistory(int productId)
         {
