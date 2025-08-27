@@ -105,6 +105,29 @@ namespace External.MyInventoryApi.Application.Services
             return serviceResult;
         }
 
+        public async Task<ServiceResult<GetProductStockSummaryResponseDto?>> GetProductStockSummary(int productId)
+        {
+            // Execute get product stock summary
+            OperationResult<ProductStockSummaryResult?> result = await _repository.GetProductStockSummary(productId);
+
+            // Map to Service Result
+            ServiceResult<GetProductStockSummaryResponseDto?> serviceResult =
+                OperationResultMapper<GetProductStockSummaryResponseDto?, ProductStockSummaryResult?>
+                    .MapToServiceResult(
+                        result,
+                        summary => ProductOperationResultMapper.MapProductStockSummary(summary)
+                )
+                ?? new ServiceResult<GetProductStockSummaryResponseDto?>
+                {
+                    Data = null,
+                    ErrorCode = result.ErrorCode,
+                    ErrorMessage = result.ErrorMessage
+                }
+            ;
+
+            return serviceResult;
+        }
+
         public async Task<ServiceResult<UpdateProductResponseDto>> UpdateProduct(ProductDto product)
         {
             // Validate product
