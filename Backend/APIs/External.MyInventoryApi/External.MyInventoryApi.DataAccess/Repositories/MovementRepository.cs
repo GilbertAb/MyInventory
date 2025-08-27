@@ -17,6 +17,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
         private readonly IConfiguration _configuration;
         private readonly ILogger<MovementRepository> _logger;
         private readonly string _spRegisterProductMovement;
+        private readonly string _spGetMovements;
         private readonly string _spGetProductStockHistory;
 
         public MovementRepository(ISqlServerDatabase database, IConfiguration configuration,
@@ -27,6 +28,8 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _spRegisterProductMovement = _configuration.GetSection("StoredProcedures:SP_REGISTER_PRODUCT_MOVEMENT").Value
+                ?? throw new ArgumentNullException("name of sp registerProductMovement not found");
+            _spGetMovements = _configuration.GetSection("StoredProcedures:SP_GET_MOVEMENTS").Value
                 ?? throw new ArgumentNullException("name of sp registerProductMovement not found");
             _spGetProductStockHistory = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_STOCK_HISTORY").Value
                 ?? throw new ArgumentNullException("name of sp getProductStockHistory not found");
@@ -78,6 +81,50 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error executing registerProductMovement: {ProductId}", registerMovementModel.ProductId);
+                throw;
+            }
+        }
+
+        public async Task<OperationResult<IEnumerable<Movement>?>> GetMovements()
+        {
+            try
+            {
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                };
+                // Execute SP 
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spGetMovements, parameters);
+
+                // Validate result
+                if (spResult.ErrorCode == 0)
+                {
+                    _logger.LogInformation("Movements retrieved successfully");
+                }
+                else
+                {
+                    _logger.LogWarning("Error retrieving movements: {ErrorCode} {ErrorMessage}",
+                        spResult.ErrorCode, spResult.ErrorMessage);
+
+                    return new OperationResult<IEnumerable<Movement>?>
+                    {
+                        Data = null,
+                        ErrorCode = spResult.ErrorCode,
+                        ErrorMessage = spResult.ErrorMessage
+                    };
+                }
+
+                // Map result
+                OperationResult<IEnumerable<Movement>?> result = StoredProcedureResultMapper<IEnumerable<Movement>?>
+                    .MapToOperationResult(
+                        spResult,
+                        dataDS => MovementStoredProcedureMapper.MapGetMovements(dataDS)
+                    );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing get movements");
                 throw;
             }
         }

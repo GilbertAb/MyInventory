@@ -40,5 +40,32 @@ namespace External.MyInventoryApi.DataAccess.Mappers
             }
             return null;
         };
+
+        public static readonly Func<DataSet, IEnumerable<Movement>?> MapGetMovements = ds =>
+        {
+            if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                var movements = new List<Movement>();
+
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    movements.Add
+                    (
+                        new Movement
+                        {
+                            Id = Convert.ToInt32(row["Id"]),
+                            ProductId = Convert.ToInt32(row["ProductID"]),
+                            MovementTypeId = Convert.ToInt32(row["MovementTypeId"]),
+                            MovementDate = (DateTime)row["MovementDate"],
+                            Quantity = Convert.ToInt32(row["Quantity"]),
+                            MovementDescription = row["MovementDescription"].ToString(),
+                            CreatedAt = (DateTime)row["CreatedAt"],
+                        }
+                    );
+                }
+                return movements;
+            }
+            return null;
+        };
     }
 }
