@@ -9,6 +9,7 @@ namespace External.MyInventoryApi.DataAccess.Contracts.Repositories
         Task<OperationResult<int?>> DeleteProduct(int productId);
         Task<OperationResult<IEnumerable<Product>?>> GetAllProducts();
         Task<OperationResult<Product?>> GetProductById(int productId);
+        Task<OperationResult<ProductStockSummaryResult?>> GetProductStockSummary(int productId);
         Task<OperationResult<int?>> UpdateProduct(Product product);
     }
 }

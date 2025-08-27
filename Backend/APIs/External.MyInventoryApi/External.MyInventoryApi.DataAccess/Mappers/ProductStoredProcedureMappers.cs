@@ -1,4 +1,5 @@
 ﻿using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.DataAccess.Contracts.Results;
 using System.Data;
 
 namespace External.MyInventoryApi.DataAccess.Mappers
@@ -75,6 +76,27 @@ namespace External.MyInventoryApi.DataAccess.Mappers
                 };
 
                 return product;
+            }
+            return null;
+        };
+
+        public static readonly Func<DataSet, ProductStockSummaryResult?> MapGetProductStockSummary = ds =>
+        {
+            if (ds?.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataRow row = ds.Tables[0].Rows[0];
+
+                ProductStockSummaryResult result = new ProductStockSummaryResult
+                {
+                    ProductName = row["ProductName"].ToString()!,
+                    Stock = Convert.ToInt32(row["Stock"]),
+                    NumberOfMovements = Convert.ToInt32(row["NumberOfMovements"]),
+                    NumberOfEntries = Convert.ToInt32(row["NumberOfEntries"]),
+                    NumberOfExits = Convert.ToInt32(row["NumberOfExits"]),
+                    LastMovementDate = (DateTime)row["LastMovementDate"],
+                };
+
+                return result;
             }
             return null;
         };

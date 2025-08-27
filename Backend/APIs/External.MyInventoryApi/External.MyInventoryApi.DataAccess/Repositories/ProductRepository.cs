@@ -19,6 +19,7 @@ namespace External.MyInventoryApi.DataAccess.Repositories
         private readonly string _spDeleteProduct;
         private readonly string _spGetAllProducts;
         private readonly string _spGetProductById;
+        private readonly string _spGetProductStockSummary;
         private readonly string _spUpdateProduct;
 
         public ProductRepository(ISqlServerDatabase database, IConfiguration configuration,
@@ -35,7 +36,9 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             _spGetAllProducts = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCTS").Value
                 ?? throw new ArgumentNullException("name of sp get products not found");
             _spGetProductById = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_BY_ID").Value
-                ?? throw new ArgumentNullException("name of sp get products not found");
+                ?? throw new ArgumentNullException("name of sp get product by id not found");
+            _spGetProductStockSummary = _configuration.GetSection("StoredProcedures:SP_GET_PRODUCT_STOCK_SUMMARY").Value
+                ?? throw new ArgumentNullException("name of sp get product stock summary not found");
             _spUpdateProduct = _configuration.GetSection("StoredProcedures:SP_UPDATE_PRODUCT").Value
                 ?? throw new ArgumentNullException("name of sp add product not found");
         }
@@ -275,6 +278,51 @@ namespace External.MyInventoryApi.DataAccess.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error executing get product by id");
+                throw;
+            }
+        }
+
+        public async Task<OperationResult<ProductStockSummaryResult?>> GetProductStockSummary(int productId)
+        {
+            try
+            {
+                Dictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    ["@ProductId"] = productId,
+                };
+                // Execute SP 
+                StoredProcedureResult<DataSet> spResult = await _database.ExecuteAsync(_spGetProductStockSummary, parameters);
+
+                // Validate result
+                if (spResult.ErrorCode == 0)
+                {
+                    _logger.LogInformation("Product stock summary retrieved successfully");
+                }
+                else
+                {
+                    _logger.LogWarning("Error retrieving product stock summary: {ErrorCode} {ErrorMessage}",
+                        spResult.ErrorCode, spResult.ErrorMessage);
+
+                    return new OperationResult<ProductStockSummaryResult?>
+                    {
+                        Data = null,
+                        ErrorCode = spResult.ErrorCode,
+                        ErrorMessage = spResult.ErrorMessage
+                    };
+                }
+
+                // Map result
+                OperationResult<ProductStockSummaryResult?> result = StoredProcedureResultMapper<ProductStockSummaryResult?>
+                    .MapToOperationResult(
+                        spResult,
+                        dataDS => ProductStoredProcedureMappers.MapGetProductStockSummary(dataDS)
+                    );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing getProductStockSummary");
                 throw;
             }
         }
