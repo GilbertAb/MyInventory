@@ -37,6 +37,20 @@ namespace External.MyInventoryApi.Controllers
 
             return Ok(result);
         }
+        [HttpGet("getMovements")]
+        public async Task<IActionResult> GetMovements(int productId)
+        {
+            // Call getMovements service
+            ServiceResult<IEnumerable<MovementDto>?> result = await _movementService.GetMovements();
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet("getProductStockHistory/{productId:int}")]
         public async Task<IActionResult> GetProductStockHistory(int productId)
         {
