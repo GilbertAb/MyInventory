@@ -1,4 +1,5 @@
-﻿using External.MyInventoryApi.Application.Contracts.DTOs.Request;
+﻿using External.MyInventoryApi.Application.Contracts.DTOs;
+using External.MyInventoryApi.Application.Contracts.DTOs.Request;
 using External.MyInventoryApi.Application.Contracts.DTOs.Response.Movement;
 using External.MyInventoryApi.Application.Contracts.Results;
 using External.MyInventoryApi.Application.Contracts.Services;
@@ -28,6 +29,19 @@ namespace External.MyInventoryApi.Controllers
             }
             // Call add product service
             ServiceResult<RegisterMovementResponseDto> result = await _movementService.RegisterMovement(request);
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
+        [HttpGet("getProductStockHistory/{productId:int}")]
+        public async Task<IActionResult> GetProductStockHistory(int productId)
+        {
+            // Call getProductStockHistory service
+            ServiceResult<IEnumerable<MovementDto>?> result = await _movementService.GetProductStockHistory(productId);
 
             if (result.ErrorCode != 0)
             {
