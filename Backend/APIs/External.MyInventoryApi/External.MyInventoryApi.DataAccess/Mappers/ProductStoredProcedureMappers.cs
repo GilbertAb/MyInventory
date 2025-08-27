@@ -93,7 +93,7 @@ namespace External.MyInventoryApi.DataAccess.Mappers
                     NumberOfMovements = Convert.ToInt32(row["NumberOfMovements"]),
                     NumberOfEntries = Convert.ToInt32(row["NumberOfEntries"]),
                     NumberOfExits = Convert.ToInt32(row["NumberOfExits"]),
-                    LastMovementDate = (DateTime)row["LastMovementDate"],
+                    LastMovementDate = (DateTime)row["LastMovement"],
                 };
 
                 return result;
