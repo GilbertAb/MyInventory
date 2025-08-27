@@ -84,6 +84,19 @@ namespace External.MyInventoryApi.Controllers
 
             return Ok(result);
         }
+        [HttpGet("getProductStockSummary/{productId:int}")]
+        public async Task<IActionResult> GetProductStockSummary(int productId)
+        {
+            // Call get product by Id service
+            ServiceResult<GetProductStockSummaryResponseDto?> result = await _productService.GetProductStockSummary(productId);
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
 
         [HttpPut("updateProduct")]
         public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest product)
