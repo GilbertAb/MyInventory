@@ -1,0 +1,166 @@
+﻿using External.MyInventoryApi.Application.Contracts.DTOs;
+using External.MyInventoryApi.Application.Contracts.DTOs.Response;
+using External.MyInventoryApi.Application.Contracts.Results;
+using External.MyInventoryApi.Application.Contracts.Services;
+using External.MyInventoryApi.Application.Mappers;
+using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.DataAccess.Contracts.Repositories;
+using External.MyInventoryApi.DataAccess.Contracts.Results;
+
+namespace External.MyInventoryApi.Application.Services
+{
+    public class ProductService : IProductService
+    {
+        private readonly IProductRepository _repository;
+
+        public ProductService(IProductRepository repository)
+        {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
+        public async Task<ServiceResult<AddProductResponseDto>> AddProduct(ProductDto product)
+        {
+            // Validate product
+            if (product == null)
+            {
+                return new ServiceResult<AddProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product can't be null"
+                };
+            }
+            // Validate product name
+            if (string.IsNullOrEmpty(product.ProductName))
+            {
+                return new ServiceResult<AddProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product name can't be null or empty"
+                };
+            }
+
+            // Execute add product
+            OperationResult<int?> result = await _repository.AddProduct(ProductMapper.MapProductDtoToProduct(product));
+
+            //Map to service result
+            ServiceResult<AddProductResponseDto?> serviceResult = OperationResultMapper<AddProductResponseDto, int?>.MapToServiceResult(
+                result,
+                id => new AddProductResponseDto { Id = id }
+            );
+
+            return serviceResult!;
+        }
+
+        public async Task<ServiceResult<DeleteProductResponseDto>> DeleteProduct(int productId)
+        {
+            // Execute delete product
+            OperationResult<int?> result = await _repository.DeleteProduct(productId);
+
+            //Map to service result
+            ServiceResult<DeleteProductResponseDto?> serviceResult = OperationResultMapper<DeleteProductResponseDto, int?>.MapToServiceResult(
+                result,
+                id => new DeleteProductResponseDto { Id = id }
+            );
+
+            return serviceResult!;
+        }
+
+        public async Task<ServiceResult<IEnumerable<ProductDto>?>> GetAllProducts()
+        {
+            // Execute get all products
+            OperationResult<IEnumerable<Product>?> result = await _repository.GetAllProducts();
+
+            // Map to Service Result
+            ServiceResult<IEnumerable<ProductDto>?> serviceResult =
+                OperationResultMapper<IEnumerable<ProductDto>?, IEnumerable<Product>?>
+                    .MapToServiceResult(
+                        result,
+                        products => ProductOperationResultMapper.MapProducts(products)
+                );
+
+            return serviceResult;
+        }
+
+        public async Task<ServiceResult<ProductDto?>> GetProductById(int productId)
+        {
+            // Execute get product by Id
+            OperationResult<Product?> result = await _repository.GetProductById(productId);
+
+            // Map to Service Result
+            ServiceResult<ProductDto?> serviceResult =
+                OperationResultMapper<ProductDto?, Product?>
+                    .MapToServiceResult(
+                        result,
+                        product => ProductOperationResultMapper.MapProduct(product!)
+                ) 
+                ?? new ServiceResult<ProductDto?> {
+                    Data = null,
+                    ErrorCode = result.ErrorCode,
+                    ErrorMessage = result.ErrorMessage
+                }
+            ;
+
+            return serviceResult;
+        }
+
+        public async Task<ServiceResult<GetProductStockSummaryResponseDto?>> GetProductStockSummary(int productId)
+        {
+            // Execute get product stock summary
+            OperationResult<ProductStockSummaryResult?> result = await _repository.GetProductStockSummary(productId);
+
+            // Map to Service Result
+            ServiceResult<GetProductStockSummaryResponseDto?> serviceResult =
+                OperationResultMapper<GetProductStockSummaryResponseDto?, ProductStockSummaryResult?>
+                    .MapToServiceResult(
+                        result,
+                        summary => ProductOperationResultMapper.MapProductStockSummary(summary)
+                )
+                ?? new ServiceResult<GetProductStockSummaryResponseDto?>
+                {
+                    Data = null,
+                    ErrorCode = result.ErrorCode,
+                    ErrorMessage = result.ErrorMessage
+                }
+            ;
+
+            return serviceResult;
+        }
+
+        public async Task<ServiceResult<UpdateProductResponseDto>> UpdateProduct(ProductDto product)
+        {
+            // Validate product
+            if (product == null)
+            {
+                return new ServiceResult<UpdateProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product can't be null"
+                };
+            }
+            // Validate product name
+            if (string.IsNullOrEmpty(product.ProductName))
+            {
+                return new ServiceResult<UpdateProductResponseDto>
+                {
+                    Data = null,
+                    ErrorCode = -1,
+                    ErrorMessage = "Product name can't be null or empty"
+                };
+            }
+
+            // Execute update product
+            OperationResult<int?> result = await _repository.UpdateProduct(ProductMapper.MapProductDtoToProduct(product));
+
+            //Map to service result
+            ServiceResult<UpdateProductResponseDto?> serviceResult = OperationResultMapper<UpdateProductResponseDto, int?>.MapToServiceResult(
+                result,
+                id => new UpdateProductResponseDto { Id = id }
+            );
+
+            return serviceResult!;
+        }
+    }
+}

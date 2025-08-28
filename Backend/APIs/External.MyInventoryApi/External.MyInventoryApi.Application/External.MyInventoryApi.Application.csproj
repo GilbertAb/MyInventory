@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.DataAccess.Contracts\External.MyInventoryApi.DataAccess.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

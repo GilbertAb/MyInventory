@@ -1,0 +1,270 @@
+{
+	"info": {
+		"_postman_id": "fcff15ed-3f12-4ae9-994a-1a6b283872e9",
+		"name": "MyInventoryApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18902371"
+	},
+	"item": [
+		{
+			"name": "HealthChecks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/health",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Metrics",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/metrics",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProducts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:53988/api/product/getProducts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "53988",
+					"path": [
+						"api",
+						"product",
+						"getProducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetMovementTypes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:53988/api/catalog/getMovementTypes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "53988",
+					"path": [
+						"api",
+						"catalog",
+						"getMovementTypes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProductStockHistory",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:53988/api/movement/getProductStockHistory/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "53988",
+					"path": [
+						"api",
+						"movement",
+						"getProductStockHistory",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProductStockSummary",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:53988/api/product/getProductStockSummary/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "53988",
+					"path": [
+						"api",
+						"product",
+						"getProductStockSummary",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetMovements",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:53988/api/movement/getMovements",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "53988",
+					"path": [
+						"api",
+						"movement",
+						"getMovements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddProduct",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ProductName\": \"Laptop\",\r\n    \"Category\": \"Technology\",\r\n    \"Stock\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/product/addProduct",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"product",
+						"addProduct"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateProduct",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ProductId\": 13,\r\n    \"ProductName\": \"\",\r\n    \"Category\": \"Technology\",\r\n    \"Stock\": 15\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/product/updateProduct",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"product",
+						"updateProduct"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProductById",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/api/product/getProduct/13",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"product",
+						"getProduct",
+						"13"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RegisterMovement",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ProductId\": 21,\r\n    \"MovementTypeId\": 1,\r\n    \"Quantity\": 5,\r\n    \"MovementDescription\": \"More units supplied\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/movement/registerMovement",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"movement",
+						"registerMovement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteProduct",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

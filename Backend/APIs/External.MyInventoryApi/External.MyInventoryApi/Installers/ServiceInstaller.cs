@@ -1,0 +1,28 @@
+﻿using External.MyInventoryApi.Application.Contracts.Services;
+using External.MyInventoryApi.Application.Services;
+using External.MyInventoryApi.CrossCutting.Contracts;
+using External.MyInventoryApi.CrossCutting.Crypto;
+using External.MyInventoryApi.DataAccess.Contracts.Repositories;
+using External.MyInventoryApi.DataAccess.Contracts.SqlServer;
+using External.MyInventoryApi.DataAccess.Repositories;
+using External.MyInventoryApi.DataAccess.SqlServer;
+
+namespace External.MyInventoryApi.Installers
+{
+    public static class ServiceInstaller
+    {
+        public static void RegisterServices(this IServiceCollection services)
+        {
+            services.AddScoped<ISqlServerDatabase, SqlServerDatabase>();
+            services.AddSingleton<ICrypto, Crypto>();
+            // Repositories
+            services.AddScoped<ICatalogRepository, CatalogRepository>();
+            services.AddScoped<IMovementRepository, MovementRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            // Services
+            services.AddScoped<ICatalogService, CatalogService>();
+            services.AddScoped<IMovementService, MovementService>();
+            services.AddScoped<IProductService, ProductService>();
+        }
+    }
+}
