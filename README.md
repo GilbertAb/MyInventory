@@ -16,16 +16,6 @@ MyInventoryApi/
 │   └── Requests/                          # Sample requests
 └── README.md
 ```
-MyInventoryApi/
-
-|-- Backend/
-  |-- APIs/ 
-     |-- External.MyInventoryApi # ASP.NET Core Web API
-  |-- SQL/ # Database scripts (tables, stored procedures, seed data, etc.)
-|
-|-- Frontend/ # (reserved, not implemented yet)
-|
-|-- README.md
 
 ---
 
