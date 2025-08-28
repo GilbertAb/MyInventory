@@ -82,7 +82,6 @@ MyInventoryApi/
 
 ### Product
 
-- **GET** `/api/product/getProductStockHistory/{productId:int}` → Returns product stock movement history.
 
 - **GET** `/api/product/getProductStockSummary/{productId:int}` → Returns stock summary of a product.
 
@@ -93,6 +92,8 @@ MyInventoryApi/
 ### Movement
 
 - **GET** `/api/movement/getMovements` → Returns all movements.
+
+- **GET** `/api/movement/getProductStockHistory/{productId:int}` → Returns product stock movement history.
 
 - **POST** `/api/movement/registerMovement` → Adds a new product movement.
 
