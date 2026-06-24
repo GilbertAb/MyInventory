@@ -20,4 +20,14 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integration\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\External.MyInventoryApi.Application.Contracts\External.MyInventoryApi.Application.Contracts.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.Application\External.MyInventoryApi.Application.csproj" />
+    <ProjectReference Include="..\External.MyInventoryApi.DataAccess.Contracts\External.MyInventoryApi.DataAccess.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>
