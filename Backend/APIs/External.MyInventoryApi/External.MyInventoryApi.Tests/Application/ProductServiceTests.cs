@@ -77,5 +77,29 @@ namespace External.MyInventoryApi.Tests.Application
             _repositoryMock.Verify(r => r.GetAllProducts(), Times.Once());
         }
 
+        [Fact]
+        public async Task GetAllProducts_ShouldReturnEmptyCollection_WhenNoProductsExist()
+        {
+            // Arrange
+            var operationResult = new OperationResult<IEnumerable<Product>?>
+            {
+                Data = [],
+                ErrorCode = 0
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetAllProducts())
+                .ReturnsAsync(operationResult);
+
+            // Act
+            var result = await _service.GetAllProducts();
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+            result.Data.Should().BeEmpty();
+
+            _repositoryMock.Verify(r => r.GetAllProducts(), Times.Once());
+        }
+
     }
 }
