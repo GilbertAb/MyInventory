@@ -590,5 +590,93 @@ namespace External.MyInventoryApi.Tests.Application
             _repositoryMock.Verify(r => r.UpdateProduct(It.IsAny<Product>()), Times.Once());
 
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| DeleteProduct use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task DeleteProduct_ShouldReturnSuccess_WhenProductExists()
+        {
+            // Arrange
+            var operationResult = new OperationResult<int?>
+            {
+                Data = 27,
+                ErrorCode = 0,
+                ErrorMessage = "Succeed"
+            };
+
+            _repositoryMock
+                .Setup(r => r.DeleteProduct(27))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.DeleteProduct(27);
+
+            // Assert
+            result.Data.Should().NotBeNull();
+            result.Data.Id.Should().Be(27);
+            result.ErrorCode.Should().Be(0);
+            result.ErrorMessage.Should().Be("Succeed");
+
+            _repositoryMock.Verify(r => r.DeleteProduct(27), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteProduct_ShouldReturnError_WhenProductDoesNotExist()
+        {
+            // Arrange
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = -1,
+                ErrorMessage = "Product not found"
+            };
+
+            _repositoryMock
+                .Setup(r => r.DeleteProduct(27))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.DeleteProduct(27);
+
+            // Assert
+            result.Data.Should().BeNull();
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Product not found");
+
+            _repositoryMock.Verify(r => r.DeleteProduct(27), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteProduct_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = 500,
+                ErrorMessage = "Database error"
+            };
+
+            _repositoryMock
+                .Setup(r => r.DeleteProduct(27))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.DeleteProduct(27);
+
+            // Assert
+            result.Data.Should().BeNull();
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+
+            _repositoryMock.Verify(r => r.DeleteProduct(27), Times.Once());
+        }
     }
 }
