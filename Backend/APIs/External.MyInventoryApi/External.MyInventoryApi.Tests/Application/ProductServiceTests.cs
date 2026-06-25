@@ -26,7 +26,11 @@ namespace External.MyInventoryApi.Tests.Application
             _service = new ProductService(_repositoryMock.Object);
         }
 
-        // GetAllProducts use case
+        /*
+         *---------------------------------------------------------
+         *---------------| GetAllProducts use case |---------------
+         *---------------------------------------------------------
+        */
         [Fact]
         public async Task GetAllProducts_ShouldReturnMappedResult_WhenRepositoryReturnsData()
         {
@@ -48,7 +52,7 @@ namespace External.MyInventoryApi.Tests.Application
                     Category = "Test"
                 }
             };
-            //OperationResult<IEnumerable<Product>?>
+            
             var operationResult = new OperationResult<IEnumerable<Product>?>
             {
                 Data = products,
@@ -125,6 +129,102 @@ namespace External.MyInventoryApi.Tests.Application
             result.ErrorMessage.Should().Be("Database error");
 
             _repositoryMock.Verify(r => r.GetAllProducts(), Times.Once());
+
+        }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| GetProductById use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetProductById_ShouldReturnMappedResult_WhenRepositoryReturnsData()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 27,
+                ProductName = "Test",
+                Stock = 10,
+                Category = "Test"
+            };
+            
+            var operationResult = new OperationResult<Product?>
+            {
+                Data = product,
+                ErrorCode = 0,
+                ErrorMessage = "Succeed"
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetProductById(27))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.GetProductById(27);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Data.Should().NotBeNull();
+            result.ErrorCode.Should().Be(0);
+            result.Data.Should().BeEquivalentTo(product, options =>
+                options
+                    .Excluding(x => x.CreatedAt)
+                    .Excluding(x => x.UpdatedAt)
+            );
+
+            _repositoryMock.Verify(r => r.GetProductById(27), Times.Once());
+        }
+
+        [Fact]
+        public async Task GetProductById_ShouldReturnNull_WhenProductDoesNotExist()
+        {
+            // Arrange
+            var operationResult = new OperationResult<Product?>
+            {
+                Data = null,
+                ErrorCode = 0
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetProductById(0))
+                .ReturnsAsync(operationResult);
+
+            // Act
+            var result = await _service.GetProductById(0);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+            result.Data.Should().BeNull();
+
+            _repositoryMock.Verify(r => r.GetProductById(0), Times.Once());
+        }
+
+        [Fact]
+        public async Task GetProductById_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+            var operationResult = new OperationResult<Product?>
+            {
+                Data = null,
+                ErrorCode = 500,
+                ErrorMessage = "Database error"
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetProductById(0))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.GetProductById(0);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+
+            _repositoryMock.Verify(r => r.GetProductById(0), Times.Once());
 
         }
 
