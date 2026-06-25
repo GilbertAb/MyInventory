@@ -101,5 +101,32 @@ namespace External.MyInventoryApi.Tests.Application
             _repositoryMock.Verify(r => r.GetAllProducts(), Times.Once());
         }
 
+        [Fact]
+        public async Task GetAllProducts_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+            var operationResult = new OperationResult<IEnumerable<Product>?>
+            {
+                Data = null,
+                ErrorCode = 500,
+                ErrorMessage = "Database error"
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetAllProducts())
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.GetAllProducts();
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+
+            _repositoryMock.Verify(r => r.GetAllProducts(), Times.Once());
+
+        }
+
     }
 }
