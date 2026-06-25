@@ -1,4 +1,5 @@
 ﻿using External.MyInventoryApi.Application.Contracts.DTOs;
+using External.MyInventoryApi.Application.Contracts.DTOs.Response;
 using External.MyInventoryApi.Application.Contracts.Services;
 using External.MyInventoryApi.Application.Services;
 using External.MyInventoryApi.Business.Entities;
@@ -227,6 +228,186 @@ namespace External.MyInventoryApi.Tests.Application
             _repositoryMock.Verify(r => r.GetProductById(0), Times.Once());
 
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| AddProduct use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task AddProduct_ShouldReturnMappedResult_WhenRepositoryReturnsData()
+        {
+            // Arrange
+            var productDto = new ProductDto
+            {
+                ProductName = "Test",
+                Stock = 10,
+                Category = "Test"
+            };
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = 27,
+                ErrorCode = 0,
+                ErrorMessage = "Succeed"
+            };
+
+            _repositoryMock
+                .Setup(r => r.AddProduct(It.IsAny<Product>()))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.AddProduct(productDto);
+
+            // Assert
+            result.Data.Should().NotBeNull();
+            result.Data.Should().BeEquivalentTo(
+                new AddProductResponseDto
+                {
+                    Id = 27
+                }    
+            );
+            result.ErrorCode.Should().Be(0);
+
+            _repositoryMock.Verify(r => r.AddProduct(It.Is<Product>(p => 
+                p.ProductName == productDto.ProductName &&
+                p.Stock == productDto.Stock &&
+                p.Category == productDto.Category
+                )), Times.Once());
+        }
+        
+        [Fact]
+        public async Task AddProduct_ShouldReturnError_WhenProductIsNull()
+        {
+            // Arrange
+            ProductDto? productDto = null;
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = -1,
+                ErrorMessage = "Product can't be null"
+            };
+
+            _repositoryMock
+                .Setup(r => r.AddProduct(null))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.AddProduct(null);
+
+            // Assert
+            result.Data.Should().BeNull();
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Product can't be null");
+
+            _repositoryMock.Verify(r => r.AddProduct(It.IsAny<Product>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task AddProduct_ShouldReturnError_WhenProductNameIsEmpty()
+        {
+            // Arrange
+            var productDto = new ProductDto
+            {
+                ProductName = "",
+                Stock = 10,
+                Category = "Test"
+            };
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = -1,
+                ErrorMessage = "Product name can't be null or empty"
+            };
+
+            _repositoryMock
+                .Setup(r => r.AddProduct(It.IsAny<Product>()))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.AddProduct(productDto);
+
+            // Assert
+            result.Data.Should().BeNull();
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Product name can't be null or empty");
+
+            _repositoryMock.Verify(r => r.AddProduct(It.IsAny<Product>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task AddProduct_ShouldReturnError_WhenProductNameIsNull()
+        {
+            // Arrange
+            var productDto = new ProductDto
+            {
+                ProductName = null,
+                Stock = 10,
+                Category = "Test"
+            };
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = -1,
+                ErrorMessage = "Product name can't be null or empty"
+            };
+
+            _repositoryMock
+                .Setup(r => r.AddProduct(It.IsAny<Product>()))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.AddProduct(productDto);
+
+            // Assert
+            result.Data.Should().BeNull();
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Product name can't be null or empty");
+
+            _repositoryMock.Verify(r => r.AddProduct(It.IsAny<Product>()), Times.Never());
+        }
+        
+        [Fact]
+        public async Task AddProduct_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+            var productDto = new ProductDto
+            {
+                ProductName = "Test",
+                Stock = 10,
+                Category = "Test"
+            };
+
+            var operationResult = new OperationResult<int?>
+            {
+                Data = null,
+                ErrorCode = 500,
+                ErrorMessage = "Database error"
+            };
+
+            _repositoryMock
+                .Setup(r => r.AddProduct(It.IsAny<Product>()))
+                .ReturnsAsync(operationResult);
+
+
+            // Act
+            var result = await _service.AddProduct(productDto);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+
+            _repositoryMock.Verify(r => r.AddProduct(It.IsAny<Product>()), Times.Once());
+
+        }
+
 
     }
 }
