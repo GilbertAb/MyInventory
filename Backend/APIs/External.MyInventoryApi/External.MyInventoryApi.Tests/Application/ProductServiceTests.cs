@@ -53,7 +53,7 @@ namespace External.MyInventoryApi.Tests.Application
                     Category = "Test"
                 }
             };
-            
+
             var operationResult = new OperationResult<IEnumerable<Product>?>
             {
                 Data = products,
@@ -149,7 +149,7 @@ namespace External.MyInventoryApi.Tests.Application
                 Stock = 10,
                 Category = "Test"
             };
-            
+
             var operationResult = new OperationResult<Product?>
             {
                 Data = product,
@@ -266,17 +266,17 @@ namespace External.MyInventoryApi.Tests.Application
                 new AddProductResponseDto
                 {
                     Id = 27
-                }    
+                }
             );
             result.ErrorCode.Should().Be(0);
 
-            _repositoryMock.Verify(r => r.AddProduct(It.Is<Product>(p => 
+            _repositoryMock.Verify(r => r.AddProduct(It.Is<Product>(p =>
                 p.ProductName == productDto.ProductName &&
                 p.Stock == productDto.Stock &&
                 p.Category == productDto.Category
                 )), Times.Once());
         }
-        
+
         [Fact]
         public async Task AddProduct_ShouldReturnError_WhenProductIsNull()
         {
@@ -373,7 +373,7 @@ namespace External.MyInventoryApi.Tests.Application
 
             _repositoryMock.Verify(r => r.AddProduct(It.IsAny<Product>()), Times.Never());
         }
-        
+
         [Fact]
         public async Task AddProduct_ShouldReturnError_WhenRepositoryReturnsError()
         {
@@ -448,18 +448,18 @@ namespace External.MyInventoryApi.Tests.Application
                 new UpdateProductResponseDto
                 {
                     Id = 27
-                }    
+                }
             );
             result.ErrorCode.Should().Be(0);
 
-            _repositoryMock.Verify(r => r.UpdateProduct(It.Is<Product>(p => 
+            _repositoryMock.Verify(r => r.UpdateProduct(It.Is<Product>(p =>
                 p.Id == productDto.Id &&
                 p.ProductName == productDto.ProductName &&
                 p.Stock == productDto.Stock &&
                 p.Category == productDto.Category
                 )), Times.Once());
         }
-        
+
         [Fact]
         public async Task UpdateProduct_ShouldReturnError_WhenProductIsNull()
         {
@@ -488,7 +488,7 @@ namespace External.MyInventoryApi.Tests.Application
 
             _repositoryMock.Verify(r => r.UpdateProduct(It.IsAny<Product>()), Times.Never());
         }
-        
+
         [Fact]
         public async Task UpdateProduct_ShouldReturnError_WhenProductNameIsEmpty()
         {
@@ -556,7 +556,7 @@ namespace External.MyInventoryApi.Tests.Application
 
             _repositoryMock.Verify(r => r.UpdateProduct(It.IsAny<Product>()), Times.Never());
         }
-        
+
         [Fact]
         public async Task UpdateProduct_ShouldReturnError_WhenRepositoryReturnsError()
         {
@@ -678,5 +678,82 @@ namespace External.MyInventoryApi.Tests.Application
 
             _repositoryMock.Verify(r => r.DeleteProduct(27), Times.Once());
         }
+
+        /*
+         *-----------------------------------------------------------------
+         *---------------| GetProductStockSummary use case |---------------
+         *-----------------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetProductStockSummary_ShouldReturnMappedResult_WhenRepositoryReturnsSuccess()
+        {
+            // Arrange
+            var productId = 10;
+
+            var repoResult = new OperationResult<ProductStockSummaryResult?>
+            {
+                Data = new ProductStockSummaryResult
+                {
+                    ProductName = "Keyboard",
+                    Stock = 100,
+                    NumberOfMovements = 20,
+                    NumberOfEntries = 15,
+                    NumberOfExits = 5
+                },
+                ErrorCode = 0,
+                ErrorMessage = "OK"
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetProductStockSummary(productId))
+                .ReturnsAsync(repoResult);
+
+            // Act
+            var result = await _service.GetProductStockSummary(productId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Data.Should().BeEquivalentTo(
+                new ProductStockSummaryResult
+                {
+                    ProductName = "Keyboard",
+                    Stock = 100,
+                    NumberOfMovements = 20,
+                    NumberOfEntries = 15,
+                    NumberOfExits = 5
+                }
+            );
+            result.ErrorCode.Should().Be(0);
+
+            _repositoryMock.Verify(r => r.GetProductStockSummary(productId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetProductStockSummary_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+            var productId = 10;
+
+            var repoResult = new OperationResult<ProductStockSummaryResult?>
+            {
+                Data = null,
+                ErrorCode = -1,
+                ErrorMessage = "Database error"
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetProductStockSummary(productId))
+                .ReturnsAsync(repoResult);
+
+            // Act
+            var result = await _service.GetProductStockSummary(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        
     }
 }
