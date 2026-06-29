@@ -323,5 +323,13 @@ namespace External.MyInventoryApi.Tests.Application
 
             _repositoryMock.Verify(r => r.GetMovements(), Times.Once());
         }
+
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new MovementService(null!)
+            );
+        }
     }
 }
