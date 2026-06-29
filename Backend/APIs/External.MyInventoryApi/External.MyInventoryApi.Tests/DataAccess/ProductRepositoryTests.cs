@@ -209,5 +209,114 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing add product: {product.ProductName}");
         }
-    }    
+
+        /*
+         *---------------------------------------------------------
+         *---------------| DeleteProduct use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task DeleteProduct_ShouldCallStoredProcedureWithCorrectParameters()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    Data = new DataSet()
+                });
+
+            // Act
+            await _repository.DeleteProduct(productId);
+
+            // Assert
+            _databaseMock.Verify(
+                d => d.ExecuteAsync(
+                    "MyInventory.usp_DeleteProduct",
+                    It.Is<Dictionary<string, object>>(p =>
+                        (int)p["@ProductId"] == 12
+                    )
+                ),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteProduct_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var productId = 12;
+
+            var dataSet = new DataSet();
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.DeleteProduct(productId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.ErrorCode.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task DeleteProduct_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.DeleteProduct(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task DeleteProduct_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing delete product: {productId}"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.DeleteProduct(productId);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing delete product: {productId}");
+        }
+    }
 }
