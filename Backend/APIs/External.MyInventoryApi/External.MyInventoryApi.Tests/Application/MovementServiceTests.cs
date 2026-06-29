@@ -1,5 +1,7 @@
-﻿using External.MyInventoryApi.Application.Services;
+﻿using External.MyInventoryApi.Application.Contracts.DTOs.Request;
+using External.MyInventoryApi.Application.Services;
 using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.DataAccess.Contracts.InputModels;
 using External.MyInventoryApi.DataAccess.Contracts.Repositories;
 using External.MyInventoryApi.DataAccess.Contracts.Results;
 using FluentAssertions;
@@ -130,6 +132,88 @@ namespace External.MyInventoryApi.Tests.Application
             result.ErrorMessage.Should().Be("Database error");
 
             _repositoryMock.Verify(r => r.GetMovements(), Times.Once());
+        }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| RegisterMovement use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task RegisterMovement_ShouldReturnMappedResult_WhenRepositoryReturnsSuccess()
+        {
+            // Arrange
+            var request = new RegisterMovementRequest
+            {
+                ProductId = 1,
+                MovementTypeId = 1,
+                Quantity = 10,
+                MovementDescription = "IN"
+            };
+
+            _repositoryMock
+                .Setup(r => r.RegisterProductMovement(It.IsAny<RegisterProductMovementInputModel>()))
+                .ReturnsAsync(new OperationResult<int?>
+                {
+                    Data = 5,
+                    ErrorCode = 0
+                });
+
+            // Act
+            var result = await _service.RegisterMovement(request);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+            result.Data.Should().NotBeNull();
+            result.Data!.Id.Should().Be(5);
+
+            _repositoryMock.Verify(
+                r => r.RegisterProductMovement(It.IsAny<RegisterProductMovementInputModel>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task RegisterMovement_ShouldReturnError_WhenRequestIsNull()
+        {
+            // Act
+            var result = await _service.RegisterMovement(null!);
+
+            // Assert
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Request can't be null");
+
+            _repositoryMock.Verify(
+                r => r.RegisterProductMovement(It.IsAny<RegisterProductMovementInputModel>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task RegisterMovement_ShouldReturnError_WhenRepositoryReturnsError()
+        {
+            // Arrange
+            var request = new RegisterMovementRequest
+            {
+                ProductId = 1,
+                MovementTypeId = 1,
+                Quantity = 10,
+                MovementDescription = "IN"
+            };
+
+            _repositoryMock
+                .Setup(r => r.RegisterProductMovement(It.IsAny<RegisterProductMovementInputModel>()))
+                .ReturnsAsync(new OperationResult<int?>
+                {
+                    Data = null,
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _service.RegisterMovement(request);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
         }
     }
 }
