@@ -131,5 +131,50 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing getMovementTypes");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| Constructor tests |---------------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenDatabaseIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new CatalogRepository(
+                    null!,
+                    new ConfigurationBuilder()
+                        .AddInMemoryCollection(configurationData)
+                        .Build(),
+                    _loggerMock.Object
+                )
+            );
+        }
+
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenConfigurationIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new CatalogRepository(
+                    _databaseMock.Object,
+                    null!,
+                    _loggerMock.Object
+                )
+            );
+        }
+
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new CatalogRepository(
+                    _databaseMock.Object,
+                    new ConfigurationBuilder()
+                        .AddInMemoryCollection(configurationData)
+                        .Build(),
+                    null!
+                )
+            );
+        }
     }
 }
