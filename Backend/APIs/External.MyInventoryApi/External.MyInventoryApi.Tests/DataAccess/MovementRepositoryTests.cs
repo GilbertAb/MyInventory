@@ -1,4 +1,6 @@
-﻿using External.MyInventoryApi.DataAccess.Contracts.SqlServer;
+﻿using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.DataAccess.Contracts.InputModels;
+using External.MyInventoryApi.DataAccess.Contracts.SqlServer;
 using External.MyInventoryApi.DataAccess.Contracts.SqlServer.Results;
 using External.MyInventoryApi.DataAccess.Repositories;
 using FluentAssertions;
@@ -136,6 +138,162 @@ namespace External.MyInventoryApi.Tests.DataAccess
             await act.Should()
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing get movements");
+        }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| RegisterMovement use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task RegisterProductMovement_ShouldThrowArgumentNullException_WhenInputIsNull()
+        {
+            Func<Task> act = async () => await _repository.RegisterProductMovement(null!);
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task RegisterProductMovement_ShouldCallStoredProcedureWithCorrectParameters()
+        {
+            // Arrange
+            var movement = new RegisterProductMovementInputModel
+            {
+                ProductId = 12,
+                MovementTypeId = 2,
+                Quantity = 15,
+                MovementDescription = "Test"
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    Data = new DataSet()
+                });
+
+            // Act
+            await _repository.RegisterProductMovement(movement);
+
+            // Assert
+            _databaseMock.Verify(
+                d => d.ExecuteAsync(
+                    "MyInventory.usp_RegisterProductMovement",
+                    It.Is<Dictionary<string, object>>(p =>
+                        (int)p["@ProductId"] == 12 &&
+                        (byte)p["@MovementTypeId"] == 2 &&
+                        (int)p["@Quantity"] == 15 &&
+                        (string)p["@MovementDescription"] == "Test"
+                    )
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task RegisterProductMovement_ShouldThrowArgumentNullException_WhenProductInputIsNull()
+        {
+            // Act
+            Func<Task> act = () => _repository.RegisterProductMovement(null!);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task RegisterProductMovement_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var movement = new RegisterProductMovementInputModel
+            {
+                ProductId = 12,
+                MovementTypeId = 2,
+                Quantity = 15,
+                MovementDescription = "Test"
+            };
+
+            var dataSet = new DataSet();
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.RegisterProductMovement(movement);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.ErrorCode.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task RegisterProductMovement_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+            var movement = new RegisterProductMovementInputModel
+            {
+                ProductId = 12,
+                MovementTypeId = 2,
+                Quantity = 15,
+                MovementDescription = "Test"
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.RegisterProductMovement(movement);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task RegisterProductMovement_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var movement = new RegisterProductMovementInputModel
+            {
+                ProductId = 12,
+                MovementTypeId = 2,
+                Quantity = 15,
+                MovementDescription = "Test"
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing registerProductMovement: {movement.ProductId}"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.RegisterProductMovement(movement);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing registerProductMovement: {movement.ProductId}");
         }
     }
 }
