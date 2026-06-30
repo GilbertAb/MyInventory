@@ -670,5 +670,128 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing update product: {product.ProductName}");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| GetProductStockSummary use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetProductStockSummary_ShouldCallStoredProcedureWithCorrectParameters()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    Data = new DataSet()
+                });
+
+            // Act
+            await _repository.GetProductStockSummary(productId);
+
+            // Assert
+            _databaseMock.Verify(
+                d => d.ExecuteAsync(
+                    "MyInventory.usp_GetProductStockSummary",
+                    It.Is<Dictionary<string, object>>(p =>
+                        (int)p["@ProductId"] == productId
+                    )
+                ),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task GetProductStockSummary_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var productId = 12;
+            var table = new DataTable();
+
+            table.Columns.Add("ProductName", typeof(string));
+            table.Columns.Add("Stock", typeof(int));
+            table.Columns.Add("NumberOfMovements", typeof(int));
+            table.Columns.Add("NumberOfEntries", typeof(int));
+            table.Columns.Add("NumberOfExits", typeof(int));
+            table.Columns.Add("LastMovement", typeof(DateTime));
+
+            table.Rows.Add("Test 12", 50, 10, 6, 4, DateTime.Now);
+
+            var dataSet = new DataSet();
+            dataSet.Tables.Add(table);
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.GetProductStockSummary(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+            result.Data.Should().NotBeNull();
+            result.Data.ProductName.Should().Be("Test 12");
+            result.Data.Stock.Should().Be(50);
+        }
+
+
+        [Fact]
+        public async Task GetProductStockSummary_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.GetProductStockSummary(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetProductStockSummary_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing getProductStockSummary"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.GetProductStockSummary(productId);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing getProductStockSummary");
+        }
     }
 }
