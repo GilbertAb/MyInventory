@@ -318,5 +318,100 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing delete product: {productId}");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| GetAllProducts use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetAllProducts_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var table = new DataTable();
+
+            table.Columns.Add("Id", typeof(int));
+            table.Columns.Add("ProductName", typeof(string));
+            table.Columns.Add("Category", typeof(string));
+            table.Columns.Add("Stock", typeof(int));
+            table.Columns.Add("CreatedAt", typeof(DateTime));
+            table.Columns.Add("UpdatedAt", typeof(DateTime));
+
+            table.Rows.Add(1, "Test", "Test", 10, DateTime.Now, null);
+            table.Rows.Add(2, "Test 2", "Test 2", 10, DateTime.Now, null);
+
+            var dataSet = new DataSet();
+            dataSet.Tables.Add(table);
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.GetAllProducts();
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+
+            result.Data.Should().NotBeNull();
+            result.Data.Should().HaveCount(2);
+
+            result.Data!.First().Id.Should().Be(1);
+            result.Data.First().ProductName.Should().Be("Test");
+        }
+
+
+        [Fact]
+        public async Task GetAllProducts_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.GetAllProducts();
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetAllProducts_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing get products"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.GetAllProducts();
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing get products");
+        }
     }
 }
