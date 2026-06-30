@@ -295,5 +295,102 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing registerProductMovement: {movement.ProductId}");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| GetProductStockHistory use case |-----------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetProductStockHistory_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var table = new DataTable();
+
+            table.Columns.Add("MovementId", typeof(int));
+            table.Columns.Add("ProductId", typeof(int));
+            table.Columns.Add("MovementTypeId", typeof(int));
+            table.Columns.Add("MovementDate", typeof(DateTime));
+            table.Columns.Add("Quantity", typeof(int));
+            table.Columns.Add("MovementDescription", typeof(string));
+            table.Columns.Add("CreatedAt", typeof(DateTime));
+
+            table.Rows.Add(1, 12, 1, DateTime.Now, 5, "New products", DateTime.Now);
+            table.Rows.Add(2, 12, 1, DateTime.Now, 5, "DAS", DateTime.Now);
+
+            var dataSet = new DataSet();
+            dataSet.Tables.Add(table);
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.GetProductStockHistory(12);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+
+            result.Data.Should().NotBeNull();
+            result.Data.Should().HaveCount(2);
+            result.Data.First().Id.Should().Be(1);
+            result.Data.First().ProductId.Should().Be(12);
+            result.Data.First().MovementTypeId.Should().Be(1);
+            result.Data.Last().Id.Should().Be(2);
+            result.Data.Last().ProductId.Should().Be(12);
+        }
+
+
+        [Fact]
+        public async Task GetProductStockHistory_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.GetProductStockHistory(12);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetProductStockHistory_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing getProductStockHistory"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.GetProductStockHistory(12);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing getProductStockHistory");
+        }
+     
     }
 }
