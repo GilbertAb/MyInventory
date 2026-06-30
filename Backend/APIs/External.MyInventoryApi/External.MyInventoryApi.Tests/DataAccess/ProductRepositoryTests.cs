@@ -413,5 +413,100 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing get products");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| GetProductById use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task GetProductById_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var productId = 12;
+            var table = new DataTable();
+
+            table.Columns.Add("Id", typeof(int));
+            table.Columns.Add("ProductName", typeof(string));
+            table.Columns.Add("Category", typeof(string));
+            table.Columns.Add("Stock", typeof(int));
+            table.Columns.Add("CreatedAt", typeof(DateTime));
+            table.Columns.Add("UpdatedAt", typeof(DateTime));
+
+            table.Rows.Add(12, "Test 12", "Test 12", 10, DateTime.Now, null);
+
+            var dataSet = new DataSet();
+            dataSet.Tables.Add(table);
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.GetProductById(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+
+            result.Data.Should().NotBeNull();
+
+            result.Data.Id.Should().Be(productId);
+            result.Data.ProductName.Should().Be("Test 12");
+        }
+
+
+        [Fact]
+        public async Task GetProductById_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.GetProductById(productId);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetProductById_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var productId = 12;
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing get product by id"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.GetProductById(productId);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing get product by id");
+        }
     }
 }
