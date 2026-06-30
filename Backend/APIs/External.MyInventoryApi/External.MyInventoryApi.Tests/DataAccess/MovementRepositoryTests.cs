@@ -391,6 +391,50 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing getProductStockHistory");
         }
-     
+
+        /*
+         *---------------------------------------------------------
+         *---------------| Constructor tests |---------------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenDatabaseIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new MovementRepository(
+                    null!,
+                    new ConfigurationBuilder()
+                        .AddInMemoryCollection(configurationData)
+                        .Build(),
+                    _loggerMock.Object
+                    )
+            );
+        }
+
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenConfigurationIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new MovementRepository(
+                    _databaseMock.Object,
+                    null!,
+                    _loggerMock.Object
+                    )
+            );
+        }
+
+        [Fact]
+        public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new MovementRepository(
+                    _databaseMock.Object,
+                    new ConfigurationBuilder()
+                        .AddInMemoryCollection(configurationData)
+                        .Build(),
+                    null!
+                    )
+            );
+        }
     }
 }
