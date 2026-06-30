@@ -508,5 +508,167 @@ namespace External.MyInventoryApi.Tests.DataAccess
                 .ThrowAsync<Exception>()
                 .WithMessage($"Error executing get product by id");
         }
+
+        /*
+         *---------------------------------------------------------
+         *---------------| UpdateProduct use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task UpdateProduct_ShouldThrowArgumentNullException_WhenInputIsNull()
+        {
+            Func<Task> act = async () => await _repository.AddProduct(null!);
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task UpdateProduct_ShouldThrowArgumentException_WhenProductNameIsEmpty()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 12,
+                ProductName = "",
+                Category = "Test",
+                Stock = 10
+            };
+
+            // Act
+            Func<Task> act = () => _repository.UpdateProduct(product);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task UpdateProduct_ShouldCallStoredProcedureWithCorrectParameters()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 12,
+                ProductName = "Test",
+                Category = "Test",
+                Stock = 15
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    Data = new DataSet()
+                });
+
+            // Act
+            await _repository.UpdateProduct(product);
+
+            // Assert
+            _databaseMock.Verify(
+                d => d.ExecuteAsync(
+                    "MyInventory.usp_UpdateProduct",
+                    It.Is<Dictionary<string, object>>(p =>
+                        (int)p["@ProductId"] == 12 &&
+                        (string)p["@ProductName"] == "Test" &&
+                        (string)p["@Category"] == "Test" &&
+                        (int)p["@Stock"] == 15)
+                ),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateProduct_ShouldReturnSuccessResult_WhenStoredProcedureSucceeds()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 12,
+                ProductName = "Test",
+                Category = "Test",
+                Stock = 15
+            };
+
+            var dataSet = new DataSet();
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 0,
+                    ErrorMessage = string.Empty,
+                    Data = dataSet
+                });
+
+            // Act
+            var result = await _repository.AddProduct(product);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.ErrorCode.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task UpdateProduct_ShouldReturnError_WhenStoredProcedureFails()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 12,
+                ProductName = "Test",
+                Category = "Test",
+                Stock = 15
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new StoredProcedureResult<DataSet>
+                {
+                    ErrorCode = 500,
+                    ErrorMessage = "Database error"
+                });
+
+            // Act
+            var result = await _repository.UpdateProduct(product);
+
+            // Assert
+            result.ErrorCode.Should().Be(500);
+            result.ErrorMessage.Should().Be("Database error");
+            result.Data.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task UpdateProduct_ShouldThrowException_WhenStoredProcedureExecutionFails()
+        {
+            // Arrange
+            var product = new Product
+            {
+                ProductName = "Test",
+                Category = "Test",
+                Stock = 15
+            };
+
+            _databaseMock
+                .Setup(d => d.ExecuteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Dictionary<string, object>>()))
+                .ThrowsAsync(new Exception($"Error executing update product: {product.ProductName}"));
+
+            // Act
+            Func<Task> act = async () =>
+                await _repository.AddProduct(product);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage($"Error executing update product: {product.ProductName}");
+        }
     }
 }
