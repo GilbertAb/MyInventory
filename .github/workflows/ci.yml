@@ -18,10 +18,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore External.MyInventoryApi.sln
+        run: dotnet restore Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln
       
       - name: Build
-        run: dotnet build External.MyInventoryApi.sln --configuration Release --no-restore
+        run: dotnet build Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-restore
       
       - name: Run tests
-        run: dotnet test External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal
