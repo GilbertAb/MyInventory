@@ -21,7 +21,7 @@ jobs:
         run: dotnet restore Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln
       
       - name: Build
-        run: dotnet build Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-restore
+        run: dotnet build External.MyInventoryApi.sln --configuration Release --no-restore
       
       - name: Run tests
         run: dotnet test Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal
