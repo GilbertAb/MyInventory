@@ -23,5 +23,17 @@ jobs:
       - name: Build
         run: dotnet build Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-restore
       
-      - name: Run tests
-        run: dotnet test Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal
+      - name: Run tests with coverage
+        run: dotnet test Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+      - name: Install reportgenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"Backend/APIs/External.MyInventoryApi/coveragereport" -classfilters:"-External.MyInventoryApi.DataAccess.SqlServer.SqlServerDatabase"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: Backend/APIs/External.MyInventoryApi/coveragereport
