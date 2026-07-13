@@ -38,7 +38,7 @@ jobs:
       - name: Begin SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner begin /k:"GilbertAb_MyInventory" /o:"gabma1011" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.exclusions="**/SqlServerDatabase.cs"
+        run: dotnet sonarscanner begin /k:"GilbertAb_MyInventory" /o:"gabma1011" /d:sonar.token="$SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.exclusions="**/SqlServerDatabase.cs"
 
       - name: Restore dependencies
         run: dotnet restore Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln
@@ -52,7 +52,7 @@ jobs:
       - name: End SonarCloud Analysis
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
       - name: Install reportgenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
