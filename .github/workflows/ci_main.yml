@@ -1,0 +1,67 @@
+name: CI Pull Request Main + SonarCloud
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-tests-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      # Required by SonarQube Cloud
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Add .NET tools to path
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Begin SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /k:"GilbertAb_MyInventory" /o:"gabma1011" /d:sonar.token="$SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.exclusions="**/SqlServerDatabase.cs"
+
+      - name: Restore dependencies
+        run: dotnet restore Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln
+      
+      - name: Build
+        run: dotnet build Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-restore
+      
+      - name: Run tests with coverage
+        run: dotnet test Backend/APIs/External.MyInventoryApi/External.MyInventoryApi.sln --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage;Format=opencover"
+
+      - name: End SonarCloud Analysis
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+      - name: Install reportgenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: reportgenerator -reports:"**/coverage.opencover.xml" -targetdir:"Backend/APIs/External.MyInventoryApi/coveragereport" -classfilters:"-External.MyInventoryApi.DataAccess.SqlServer.SqlServerDatabase"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-main
+          path: Backend/APIs/External.MyInventoryApi/coveragereport
