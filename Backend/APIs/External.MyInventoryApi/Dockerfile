@@ -13,11 +13,17 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 
 WORKDIR /app
 
-ENV DOTNET_RUNNING_IN_CONTAINER=true
-
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 COPY --from=build /app/publish .
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV ASPNETCORE_URLS=http://+:8080
+
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "External.MyInventoryApi.dll"]
