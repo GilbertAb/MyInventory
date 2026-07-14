@@ -1,0 +1,28 @@
+# Build output
+**/bin/
+**/obj/
+
+# Coverage reports
+coveragereport/
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+**/.classpath
+**/.project
+**/.settings
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SonarCloud
+**/.sonarqube/
+
+# Visual Studio
+**/.vs/
+**/.vscode
