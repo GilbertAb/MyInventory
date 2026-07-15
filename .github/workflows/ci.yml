@@ -37,3 +37,7 @@ jobs:
         with:
           name: code-coverage
           path: Backend/APIs/External.MyInventoryApi/coveragereport
+
+      - name: Build Docker image
+        working-directory: Backend/APIs/External.MyInventoryApi
+        run: docker build -t myinventory-api .
