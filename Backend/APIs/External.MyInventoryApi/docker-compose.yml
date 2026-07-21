@@ -20,9 +20,9 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__SqlServer: "wC52gqCyW93Qs69eXkErfEI9SS68aPE+SctSjnMEbU8e9+5jrIlp1wWbzmE+6IXzHgCP2x+EbWXbFbTRUcoSb78f7QdVbdRCRwaiXKjr9OGoiIqadG6Md2QVINuumYVn1tso/A6JxhADB43DeN68A2/lX+6YATL/NVhet1xjgKo="
-      Crypto__KEY: "lou7bp4r3q02eR1fi3bjgwmzLk9tP5jb"
-      Crypto__IV: "uRm50jbaQga9v7tp"
+      ConnectionStrings__SqlServer: ${SQL_CONNECTION_STRING_ENCRYPTED}
+      Crypto__KEY: ${CRYPTO_KEY}
+      Crypto__IV: ${CRYPTO_IV}
 
   db-init:
     image: mcr.microsoft.com/mssql-tools
