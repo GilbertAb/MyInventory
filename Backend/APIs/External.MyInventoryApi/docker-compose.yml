@@ -3,7 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: MyStrongPassword2025!
+      MSSQL_SA_PASSWORD: "MyStrongPassword2025!"
     ports:
       - "1433:1433"
     volumes:
@@ -20,9 +20,22 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__SqlServer: "08Pa3ZyLtRWGnppMk4aN2S+2QMKf/PgO9dEEK3J3BVJ8RrJmvLrxbjF6LBgRagEl/m1cT03MJps87gnoL9fYSgTodlmtobHoyeItWWseYYobW6Jet9JKoRoPe7p8yj70+lNarnjoOk5mjqq80azkZwCHEyFML8hvuXqrIDVkbiizMBwWKw4tKbY3FuGPq6Ix"
+      ConnectionStrings__SqlServer: "wC52gqCyW93Qs69eXkErfEI9SS68aPE+SctSjnMEbU8e9+5jrIlp1wWbzmE+6IXzHgCP2x+EbWXbFbTRUcoSb78f7QdVbdRCRwaiXKjr9OGoiIqadG6Md2QVINuumYVn1tso/A6JxhADB43DeN68A2/lX+6YATL/NVhet1xjgKo="
       Crypto__KEY: "lou7bp4r3q02eR1fi3bjgwmzLk9tP5jb"
       Crypto__IV: "uRm50jbaQga9v7tp"
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    environment:
+      MSSQL_SA_PASSWORD: "MyStrongPassword2025!"
+    volumes:
+      - ../../SQL:/scripts
+      - ./Docker/init-db.sh:/init-db.sh
+    entrypoint:
+      - /bin/bash
+      - /init-db.sh
 
 volumes:
   sql_data:
