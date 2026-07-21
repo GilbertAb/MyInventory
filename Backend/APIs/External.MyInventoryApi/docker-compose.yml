@@ -9,6 +9,16 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: myinventory-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+
   api:
     container_name: myinventory-api
     build:
@@ -16,6 +26,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - sqlserver
+      - rabbitmq
     ports:
       - "8080:8080"
     environment:
