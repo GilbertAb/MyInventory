@@ -1,0 +1,28 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: MyStrongPassword2025!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    
+  api:
+    container_name: myinventory-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - sqlserver
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__SqlServer: "08Pa3ZyLtRWGnppMk4aN2S+2QMKf/PgO9dEEK3J3BVJ8RrJmvLrxbjF6LBgRagEl/m1cT03MJps87gnoL9fYSgTodlmtobHoyeItWWseYYobW6Jet9JKoRoPe7p8yj70+lNarnjoOk5mjqq80azkZwCHEyFML8hvuXqrIDVkbiizMBwWKw4tKbY3FuGPq6Ix"
+      Crypto__KEY: "lou7bp4r3q02eR1fi3bjgwmzLk9tP5jb"
+      Crypto__IV: "uRm50jbaQga9v7tp"
+
+volumes:
+  sql_data:
