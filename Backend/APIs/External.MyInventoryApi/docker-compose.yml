@@ -1,0 +1,52 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "MyStrongPassword2025!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: myinventory-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+
+  api:
+    container_name: myinventory-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__SqlServer: ${SQL_CONNECTION_STRING_ENCRYPTED}
+      Crypto__KEY: ${CRYPTO_KEY}
+      Crypto__IV: ${CRYPTO_IV}
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    environment:
+      MSSQL_SA_PASSWORD: "MyStrongPassword2025!"
+    volumes:
+      - ../../SQL:/scripts
+      - ./Docker/init-db.sh:/init-db.sh
+    entrypoint:
+      - /bin/bash
+      - /init-db.sh
+
+volumes:
+  sql_data:
