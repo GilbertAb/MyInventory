@@ -8,13 +8,40 @@ Inventory management REST API built with **.NET 8** and **SQL Server**.
 
 - ASP.NET Core Web API (.NET 8)
 - SQL Server + Stored Procedures
+- Docker & Docker Compose
+- RabbitMQ (Development Environment)
 - Layered Architecture
 - AES-encrypted database connection strings
+- Automatic database initialization
+- Persistent SQL Server storage
 - Unit Testing (xUnit, Moq, FluentAssertions)
 - Code Coverage Reporting
 - GitHub Actions CI Pipeline
 - Health Checks
 - GitHub Issue & Pull Request Templates
+
+---
+## Quick Start
+
+```bash
+cd Backend/APIs/External.MyInventoryApi
+
+cp .env.example .env
+
+docker compose up -d
+```
+
+API
+
+```
+http://localhost:8080
+```
+
+RabbitMQ
+
+```
+http://localhost:15672
+```
 
 ---
 
@@ -86,7 +113,8 @@ External.MyInventoryApi
 ## Requirements
 
 - .NET 8 SDK
-- SQL Server
+- Docker Desktop (Docker Engine + Docker Compose)
+- SQL Server (only for manual/local execution)
 - Postman (optional)
 
 ---
@@ -100,6 +128,7 @@ External.MyInventoryApi
 #### Schemas
 
 - `1_script_create_scheme`
+- `2_script_create_application_user`
 
 #### Tables
 
@@ -290,23 +319,91 @@ Additional request examples are available in the Postman collection located unde
 ```text
 Backend/Requests
 ```
+---
+
+## Docker
+
+The project can be started using Docker Compose, which automatically provisions:
+
+- SQL Server 2022
+- RabbitMQ Management
+- MyInventory API
+- Database initialization
+- Persistent SQL Server storage
+
+### Environment Variables
+
+Create a `.env` file in:
+
+```text
+Backend/APIs/External.MyInventoryApi
+```
+
+Example:
+
+```env
+SQL_CONNECTION_STRING_ENCRYPTED=<encrypted_connection_string>
+CRYPTO_KEY=<aes_key>
+CRYPTO_IV=<aes_iv>
+
+RABBITMQ_USER=admin
+RABBITMQ_PASSWORD=<password>
+```
+
+### Run
+
+```bash
+docker compose up -d
+```
+
+API:
+
+```text
+http://localhost:8080
+```
+
+RabbitMQ Management:
+
+```text
+http://localhost:15672
+```
+
+AMQP:
+
+```text
+localhost:5672
+```
+
+Stop:
+
+```bash
+docker compose down
+```
 
 ---
 
 ## Database Setup
 
+### Option 1 - Docker (Recommended)
+
+The database is automatically created and initialized when running:
+
+```bash
+docker compose up -d
+```
+
+### Option 2 - Local
 1. Open the `Backend/SQL` folder.
 2. Execute the scripts in the following order:
 
 ```text
-1_script_create_database_my_inventory.sql
-
+0_database/
 1_schemas/
 2_tables/
-3_seeds/
-4_functions/
+3_functions/
+4_procedures/
 5_triggers/
-6_procedures/
+6_seeds/
 ```
 
 3. Configure the connection string in `appsettings.json`.
@@ -325,9 +422,12 @@ Example:
 
 ## API Configuration
 
-The application uses `appsettings.json` for configuration.
+The application supports configuration through both:
 
-### Example
+- appsettings.json/appsettings.Development.json (local execution)
+- Environment variables (Docker)
+
+### Example (appsettings.json/appsettings.Development.json)
 
 ```json
 {
@@ -413,6 +513,7 @@ The project uses GitHub Actions to validate every Pull Request targeting `develo
 2. Build solution
 3. Execute unit tests
 4. Generate code coverage reports
+5. Publish coverage artifacts
 
 Pull requests cannot be merged if the pipeline fails.
 
@@ -447,6 +548,7 @@ The repository includes:
 
 ## Build and Run
 
+### Local
 ```bash
 # Navigate to API folder
 cd Backend/APIs/External.MyInventoryApi
@@ -459,6 +561,14 @@ dotnet build
 
 # Run API
 dotnet run
+```
+### Docker
+```bash
+# Navigate to API folder
+cd Backend/APIs/External.MyInventoryApi
+
+# Run Docker Compose
+docker compose up -d
 ```
 
 ---
@@ -482,16 +592,22 @@ https://localhost:53987
 http://localhost:53988
 ```
 
+Run the requests against my Docker API instance
+
+Default URL:
+```text
+http://localhost:8080
+```
 ---
 
 ## Roadmap
 
 Planned improvements:
 
-- Docker support
-- Docker image publishing
-- SonarCloud integration
-- Quality Gates
+- RabbitMQ asynchronous messaging
+- Message consumers
+- Dead Letter Queue (DLQ)
+- Docker image publishing (GHCR)
 - Automated deployments
 
 ---
