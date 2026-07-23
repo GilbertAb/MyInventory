@@ -2,6 +2,6 @@
 {
     public interface IEventBus
     {
-        Task PublishAsync<T>(T integrationEvent);
+        Task PublishAsync<T>(T integrationEvent) where T : class;
     }
 }
