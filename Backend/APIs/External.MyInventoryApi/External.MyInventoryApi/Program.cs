@@ -15,6 +15,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnCh
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.RegisterServices();
+builder.Services.RegisterMassTransit(builder.Configuration);
 builder.Services.RegisterHealthChecks();
 
 // Build
