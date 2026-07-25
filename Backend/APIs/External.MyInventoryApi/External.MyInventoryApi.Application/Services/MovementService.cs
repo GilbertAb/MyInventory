@@ -2,10 +2,12 @@
 using External.MyInventoryApi.Application.Contracts.DTOs.Request;
 using External.MyInventoryApi.Application.Contracts.DTOs.Response;
 using External.MyInventoryApi.Application.Contracts.DTOs.Response.Movement;
+using External.MyInventoryApi.Application.Contracts.Messaging;
 using External.MyInventoryApi.Application.Contracts.Results;
 using External.MyInventoryApi.Application.Contracts.Services;
 using External.MyInventoryApi.Application.Mappers;
 using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.Business.Messaging.Commands;
 using External.MyInventoryApi.DataAccess.Contracts.Repositories;
 using External.MyInventoryApi.DataAccess.Contracts.Results;
 
@@ -14,10 +16,12 @@ namespace External.MyInventoryApi.Application.Services
     public class MovementService : IMovementService
     {
         private readonly IMovementRepository _repository;
+        private readonly IEventBus _eventBus;
 
-        public MovementService(IMovementRepository repository)
+        public MovementService(IMovementRepository repository, IEventBus eventBus)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         }
         public async Task<ServiceResult<RegisterMovementResponseDto>> RegisterMovement(RegisterMovementRequest request)
         {
@@ -90,6 +94,25 @@ namespace External.MyInventoryApi.Application.Services
             ;
 
             return serviceResult;
+        }
+
+        // Messaging 
+        public async Task<ServiceResult> PublishRegisterMovement(RegisterMovementRequest request)
+        {
+            // Validate request
+            if (request == null)
+            {
+                return new ServiceResult
+                {
+                    ErrorCode = -1,
+                    ErrorMessage = "Request can't be null"
+                };
+            }
+
+            // Send message
+            await _eventBus.PublishAsync(MovementMapper.MapRegisterMovementRequestToCommand(request));
+
+            return ServiceResult.Success();
         }
     }
 }

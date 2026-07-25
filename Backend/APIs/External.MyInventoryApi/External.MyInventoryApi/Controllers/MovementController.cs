@@ -64,5 +64,25 @@ namespace External.MyInventoryApi.Controllers
 
             return Ok(result);
         }
+
+        // Async processing
+        [HttpPost("publishRegisterMovement")]
+        public async Task<IActionResult> PublishRegisterMovement([FromBody] RegisterMovementRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Request can't be null");
+            }
+            // Call add product service
+            ServiceResult result = await _movementService.PublishRegisterMovement(request);
+
+            if (result.ErrorCode != 0)
+            {
+                return BadRequest(new { result.ErrorCode, result.ErrorMessage });
+            }
+
+            return Accepted(result);
+        }
+
     }
 }
