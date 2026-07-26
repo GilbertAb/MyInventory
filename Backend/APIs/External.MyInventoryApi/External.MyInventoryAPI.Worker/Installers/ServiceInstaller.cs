@@ -4,6 +4,7 @@ using External.MyInventoryApi.CrossCutting.Crypto;
 using External.MyInventoryApi.CrossCutting.Messaging;
 using External.MyInventoryApi.DataAccess.Contracts.SqlServer;
 using External.MyInventoryApi.DataAccess.SqlServer;
+using External.MyInventoryAPI.Worker.Consumers;
 using MassTransit;
 
 namespace External.MyInventoryAPI.Worker.Installers
@@ -25,9 +26,12 @@ namespace External.MyInventoryAPI.Worker.Installers
         {
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<RegisterMovementConsumer>();
+
                 x.UsingRabbitMq((context, rabbitMqConfig) =>
                 {
                     ConfigureRabbitMqHost(rabbitMqConfig, configuration);
+                    rabbitMqConfig.ConfigureEndpoints(context);
                 });
             });
         }
