@@ -31,6 +31,12 @@ namespace External.MyInventoryAPI.Worker.Installers
                 x.UsingRabbitMq((context, rabbitMqConfig) =>
                 {
                     ConfigureRabbitMqHost(rabbitMqConfig, configuration);
+
+                    rabbitMqConfig.UseMessageRetry(r =>
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                    });
+
                     rabbitMqConfig.ConfigureEndpoints(context);
                 });
             });
