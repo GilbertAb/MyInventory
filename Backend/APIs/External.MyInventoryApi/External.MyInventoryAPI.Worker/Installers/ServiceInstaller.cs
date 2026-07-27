@@ -1,8 +1,12 @@
 ﻿using External.MyInventoryApi.Application.Contracts.Messaging;
+using External.MyInventoryApi.Application.Contracts.Services;
+using External.MyInventoryApi.Application.Services;
 using External.MyInventoryApi.CrossCutting.Contracts;
 using External.MyInventoryApi.CrossCutting.Crypto;
 using External.MyInventoryApi.CrossCutting.Messaging;
+using External.MyInventoryApi.DataAccess.Contracts.Repositories;
 using External.MyInventoryApi.DataAccess.Contracts.SqlServer;
+using External.MyInventoryApi.DataAccess.Repositories;
 using External.MyInventoryApi.DataAccess.SqlServer;
 using External.MyInventoryAPI.Worker.Consumers;
 using MassTransit;
@@ -15,7 +19,12 @@ namespace External.MyInventoryAPI.Worker.Installers
         {
             services.AddScoped<ISqlServerDatabase, SqlServerDatabase>();
             services.AddSingleton<ICrypto, Crypto>();
-            
+
+            // Repositories
+            services.AddScoped<IMovementRepository, MovementRepository>();
+
+            // Services
+            services.AddScoped<IMovementService, MovementService>();
 
             // Messaging
             services.AddMassTransit();

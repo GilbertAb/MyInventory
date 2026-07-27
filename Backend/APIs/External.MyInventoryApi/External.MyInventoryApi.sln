@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.MyInventoryApi.App
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.MyInventoryApi.Tests", "External.MyInventoryApi.Tests\External.MyInventoryApi.Tests.csproj", "{C042A0F4-5020-5D37-0923-5E5030393652}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.MyInventoryAPI.Worker", "External.MyInventoryAPI.Worker\External.MyInventoryAPI.Worker.csproj", "{8F7DF89F-884B-4DBA-A8C7-0CAD3B0B6160}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.MyInventoryApi.Worker", "External.MyInventoryAPI.Worker\External.MyInventoryApi.Worker.csproj", "{8F7DF89F-884B-4DBA-A8C7-0CAD3B0B6160}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
