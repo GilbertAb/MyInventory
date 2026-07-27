@@ -38,6 +38,22 @@ services:
       RabbitMQ__Username: ${RABBITMQ_USER}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
 
+  worker:
+    container_name: myinventory-worker
+    build:
+      context: .
+      dockerfile: External.MyInventoryAPI.Worker/Dockerfile
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    environment:
+      ConnectionStrings__SqlServer: ${SQL_CONNECTION_STRING_ENCRYPTED}
+      Crypto__KEY: ${CRYPTO_KEY}
+      Crypto__IV: ${CRYPTO_IV}
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+
   db-init:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
