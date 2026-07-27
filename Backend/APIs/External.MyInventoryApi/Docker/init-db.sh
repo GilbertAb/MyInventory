@@ -64,4 +64,4 @@ execute_scripts "/scripts/4_procedures"
 execute_scripts "/scripts/5_triggers"
 execute_scripts "/scripts/6_seeds"
 
-echo "Database initialization completed successfully."
+echo "Database initialization completed successfully." 
