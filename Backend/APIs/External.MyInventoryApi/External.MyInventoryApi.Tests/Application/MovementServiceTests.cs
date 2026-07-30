@@ -1,6 +1,9 @@
 ﻿using External.MyInventoryApi.Application.Contracts.DTOs.Request;
+using External.MyInventoryApi.Application.Contracts.Messaging;
+using External.MyInventoryApi.Application.Contracts.Results;
 using External.MyInventoryApi.Application.Services;
 using External.MyInventoryApi.Business.Entities;
+using External.MyInventoryApi.Business.Messaging.Commands;
 using External.MyInventoryApi.DataAccess.Contracts.InputModels;
 using External.MyInventoryApi.DataAccess.Contracts.Repositories;
 using External.MyInventoryApi.DataAccess.Contracts.Results;
@@ -17,12 +20,14 @@ namespace External.MyInventoryApi.Tests.Application
     public class MovementServiceTests
     {
         private readonly Mock<IMovementRepository> _repositoryMock;
+        private readonly Mock<IEventBus> _eventBusMock;
         private readonly MovementService _service;
 
         public MovementServiceTests ()
         {
             _repositoryMock = new Mock<IMovementRepository>();
-            _service = new MovementService( _repositoryMock.Object );
+            _eventBusMock = new Mock<IEventBus>();
+            _service = new MovementService( _repositoryMock.Object, _eventBusMock.Object );
         }
 
 
@@ -324,11 +329,89 @@ namespace External.MyInventoryApi.Tests.Application
             _repositoryMock.Verify(r => r.GetMovements(), Times.Once());
         }
 
+        /*
+         *---------------------------------------------------------
+         *---------------| PublishRegisterMovement use case |---------------
+         *---------------------------------------------------------
+        */
+        [Fact]
+        public async Task PublishRegisterMovement_ShouldReturnMappedResult_WhenRepositoryReturnsSuccess()
+        {
+            // Arrange
+            var request = new RegisterMovementRequest
+            {
+                ProductId = 1,
+                MovementTypeId = 1,
+                Quantity = 10,
+                MovementDescription = "IN"
+            };
+
+            _eventBusMock
+                .Setup(x => x.PublishAsync(It.IsAny<RegisterMovementCommand>()))
+                .Returns(Task.CompletedTask);
+            // Act
+            var result = await _service.PublishRegisterMovement(request);
+
+            // Assert
+            result.ErrorCode.Should().Be(0);
+
+            _eventBusMock.Verify(
+                x => x.PublishAsync(It.Is<RegisterMovementCommand>(c =>
+                    c.ProductId == request.ProductId &&
+                    c.MovementTypeId == request.MovementTypeId &&
+                    c.Quantity == request.Quantity &&
+                    c.MovementDescription == request.MovementDescription)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task PublishRegisterMovement_ShouldReturnError_WhenRequestIsNull()
+        {
+            // Act
+            var result = await _service.PublishRegisterMovement(null!);
+
+            // Assert
+            result.ErrorCode.Should().Be(-1);
+            result.ErrorMessage.Should().Be("Request can't be null");
+
+            _eventBusMock.Verify(
+                x => x.PublishAsync(It.IsAny<RegisterMovementCommand>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task PublishRegisterMovement_ShouldReturnError_WhenMassTransitFails()
+        {
+            // Arrange
+            var request = new RegisterMovementRequest
+            {
+                ProductId = 1,
+                MovementTypeId = 1,
+                Quantity = 10,
+                MovementDescription = "IN"
+            };
+
+            _eventBusMock
+                .Setup(x => x.PublishAsync(It.IsAny<RegisterMovementCommand>()))
+                .ThrowsAsync(new Exception("RabbitMQ error"));
+
+            // Act
+            Func<Task> act = () => _service.PublishRegisterMovement(request);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("RabbitMQ error");
+        }
+
         [Fact]
         public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new MovementService(null!)
+                () => new MovementService(null!, _eventBusMock.Object)
             );
         }
     }
